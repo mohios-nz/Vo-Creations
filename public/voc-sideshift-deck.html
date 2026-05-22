@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoC × SideShift — Positioning Bet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-light: #fafafa;
+  --bg-dark: #050714;
+  --text: #0a0a0b;
+  --text-muted: #5e5e66;
+  --text-light: #98989f;
+  --accent: #7c3aed;
+  --accent-light: #c4b5fd;
+  --border: #e8e8ea;
+  --highlight: #fef3c7;
+  --good: #16a34a;
+  --bad: #dc2626;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--bg-light);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* SLIDE BASE */
+.slide {
+  min-height: 100vh;
+  padding: 80px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-snap-align: start;
+  position: relative;
+}
+.slide-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+.slide.dark {
+  background: radial-gradient(ellipse at top, #2d1b69 0%, #0a0e2e 50%, #050714 100%);
+  color: white;
+}
+.slide.dark::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 85% 15%, rgba(124,58,237,0.25) 0%, transparent 50%),
+              radial-gradient(circle at 15% 85%, rgba(59,130,246,0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+.slide.dark .slide-inner { position: relative; z-index: 1; }
+
+/* NAV INDICATOR */
+.nav-indicator {
+  position: fixed; top: 24px; right: 32px;
+  background: rgba(10,10,11,0.75);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  z-index: 100;
+  letter-spacing: 0.5px;
+}
+.progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 3px;
+  background: var(--accent);
+  width: 0%;
+  z-index: 101;
+  transition: width 0.15s ease;
+}
+
+/* SLIDE LABEL */
+.slide-label {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+.slide.dark .slide-label { color: var(--accent-light); }
+
+/* TYPOGRAPHY */
+.headline {
+  font-size: 64px; font-weight: 800;
+  letter-spacing: -1.5px; line-height: 1.05;
+  margin-bottom: 24px;
+}
+.headline.smaller { font-size: 48px; letter-spacing: -1px; }
+.headline .accent { color: var(--accent); }
+.slide.dark .headline .accent { color: var(--accent-light); }
+
+.sub {
+  font-size: 22px; font-weight: 400;
+  color: var(--text-muted); max-width: 800px;
+  line-height: 1.5; margin-bottom: 16px;
+}
+.slide.dark .sub { color: rgba(255,255,255,0.75); }
+
+.serif {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-weight: 400;
+}
+
+/* TITLE SLIDE */
+.title-slide .meta {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 18px;
+  opacity: 0.7; margin-top: 28px;
+}
+
+/* COMPETITOR CARDS */
+.comp-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  margin-top: 32px;
+}
+.comp-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.slide.dark .comp-card {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+}
+.comp-card .name {
+  font-weight: 800; font-size: 16px; margin-bottom: 8px;
+}
+.comp-card .tag {
+  color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 14px;
+  min-height: 60px;
+}
+.slide.dark .comp-card .tag { color: rgba(255,255,255,0.65); }
+.comp-card .stats {
+  font-size: 12px; color: var(--text-light);
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.slide.dark .comp-card .stats { color: rgba(255,255,255,0.55); }
+.comp-card .stats span {
+  background: #f5f3ff; color: var(--accent);
+  padding: 3px 8px; border-radius: 4px;
+  font-weight: 600;
+}
+.slide.dark .comp-card .stats span {
+  background: rgba(124,58,237,0.2); color: var(--accent-light);
+}
+
+/* CALLOUT BOX */
+.callout {
+  background: white;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 22px 28px;
+  margin: 32px 0;
+  font-size: 19px; font-weight: 500;
+  max-width: 900px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.slide.dark .callout {
+  background: rgba(255,255,255,0.05);
+  border-left-color: var(--accent-light);
+}
+
+/* COMPARISON TABLE */
+.matrix {
+  margin-top: 24px;
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: white;
+  font-size: 13.5px;
+}
+.matrix table { width: 100%; border-collapse: collapse; }
+.matrix th, .matrix td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.matrix tr:last-child td { border-bottom: none; }
+.matrix th {
+  background: #fafafa;
+  font-weight: 700; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+.matrix .axis { font-weight: 700; color: var(--text); background: #fafafa; width: 130px; }
+.matrix .voc { background: #f5f3ff; font-weight: 700; color: var(--accent); }
+.matrix .voc-cell { background: #faf5ff; font-weight: 600; }
+.matrix .gap { color: var(--bad); font-weight: 600; }
+.matrix .check { color: var(--good); font-weight: 600; }
+
+/* TWO-COL */
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 32px; margin-top: 24px;
+}
+.col-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+}
+.slide.dark .col-card {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+}
+.col-card h4 {
+  font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--accent); margin-bottom: 14px;
+}
+.slide.dark .col-card h4 { color: var(--accent-light); }
+.col-card .big {
+  font-size: 32px; font-weight: 800;
+  line-height: 1.15; margin-bottom: 12px; letter-spacing: -0.5px;
+}
+.col-card p { color: var(--text-muted); line-height: 1.6; }
+.slide.dark .col-card p { color: rgba(255,255,255,0.7); }
+
+/* BET STATEMENT */
+.bet-statement {
+  font-size: 38px; font-weight: 700;
+  line-height: 1.25; letter-spacing: -0.8px;
+  max-width: 950px;
+  margin: 24px 0;
+}
+.bet-statement .accent { color: var(--accent-light); font-style: italic; font-family: 'Playfair Display', serif; font-weight: 500; }
+
+.three-wedges {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  margin-top: 36px;
+}
+.wedge {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 22px;
+  backdrop-filter: blur(10px);
+}
+.wedge .num {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 32px;
+  color: var(--accent-light); margin-bottom: 4px;
+}
+.wedge h5 {
+  font-size: 17px; font-weight: 700; margin-bottom: 10px;
+}
+.wedge p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+
+/* PROOF GRID */
+.proof-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;
+  margin-top: 32px;
+}
+.proof-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px;
+  text-align: center;
+}
+.proof-card .client {
+  font-weight: 800; font-size: 14px; margin-bottom: 6px;
+}
+.proof-card .num {
+  font-size: 24px; font-weight: 800; color: var(--accent);
+  line-height: 1.1; margin: 6px 0;
+}
+.proof-card .label {
+  font-size: 11px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+}
+
+/* LLM SCREENSHOT */
+.llm-demo {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  margin-top: 28px;
+}
+.llm-demo .panel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 22px;
+}
+.llm-demo .panel h5 {
+  font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--accent-light);
+  margin-bottom: 14px; font-weight: 700;
+}
+.llm-demo .panel .quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 17px;
+  line-height: 1.5; color: rgba(255,255,255,0.9);
+}
+.llm-demo .tokens {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 12px; line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+}
+.llm-demo .tokens .t {
+  display: inline-block;
+  background: rgba(124,58,237,0.25);
+  border: 1px solid rgba(124,58,237,0.5);
+  color: var(--accent-light);
+  padding: 2px 8px; margin: 2px 3px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* LEAVE OUT LIST */
+.leave-out {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  margin-top: 28px;
+}
+.lo-item {
+  background: white; border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 22px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.lo-item .x {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #fee2e2; color: var(--bad);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; flex-shrink: 0;
+}
+.lo-item .body { flex: 1; }
+.lo-item .title { font-weight: 700; font-size: 14.5px; margin-bottom: 4px; }
+.lo-item .why { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* OUTCOME / IFRAME */
+.outcome-intro { text-align: center; margin-bottom: 32px; }
+.outcome-frame {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  height: 700px;
+  background: white;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+}
+.outcome-frame iframe {
+  width: 100%; height: 100%; border: none;
+}
+.open-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: white;
+  padding: 12px 22px; border-radius: 10px;
+  font-weight: 600; font-size: 14px;
+  text-decoration: none; margin-top: 18px;
+}
+
+/* PRESSURE TEST */
+.pressure-test {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-top: 24px;
+}
+.pressure-test .lbl {
+  font-size: 12px; font-weight: 800;
+  color: #92400e; text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 10px;
+}
+.pressure-test h4 {
+  font-size: 22px; font-weight: 700; margin-bottom: 10px; color: #78350f;
+}
+.pressure-test p { color: #78350f; font-size: 15px; line-height: 1.6; }
+
+/* HINT */
+.scroll-hint {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px; text-transform: uppercase;
+  z-index: 100; pointer-events: none;
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -6px); }
+}
+.scroll-hint.dark-only { display: none; }
+.slide.dark ~ .scroll-hint { display: block; }
+
+@media (max-width: 800px) {
+  .slide { padding: 60px 24px; }
+  .headline { font-size: 40px; }
+  .headline.smaller { font-size: 32px; }
+  .sub { font-size: 17px; }
+  .comp-grid, .three-wedges, .leave-out, .two-col, .llm-demo { grid-template-columns: 1fr; }
+  .proof-grid { grid-template-columns: repeat(2, 1fr); }
+  .bet-statement { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-indicator" id="navIndicator">01 / 12</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide dark title-slide" data-slide="1">
+  <div class="slide-inner">
+    <div class="slide-label">Internal · Strategy memo</div>
+    <h1 class="headline">VoC × SideShift<br/><span class="accent">Positioning Bet</span></h1>
+    <p class="sub">How we stand out among four featured agencies — and why "skin in the game" beats "more views than them."</p>
+    <div class="meta">Prepared May 22 2026 · Thienvu, Daniel, Danny</div>
+  </div>
+</section>
+
+<!-- SLIDE 2: THE SETUP -->
+<section class="slide" data-slide="2">
+  <div class="slide-inner">
+    <div class="slide-label">The setup</div>
+    <h2 class="headline smaller">We just bought a seat at the table.<br/>Now we have <span class="accent">five seconds</span> to differentiate.</h2>
+    <p class="sub">$3K/month for the SideShift Discover featured row, plus 10% on every deal that closes through the platform. We are now one of four agencies a sophisticated buyer sees side-by-side on the same page. If our card doesn't hit different in five seconds, this is dead money.</p>
+    <div class="callout">
+      The question isn't <em>"how do we look like a good UGC agency?"</em><br/>
+      It's <em>"how do we be the only obvious pick when the buyer compares us to four others?"</em>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3: THE COMPETITION -->
+<section class="slide" data-slide="3">
+  <div class="slide-inner">
+    <div class="slide-label">The competition</div>
+    <h2 class="headline smaller">Four agencies. Four similar songs.</h2>
+    <p class="sub">Every featured agency leads with the same hook: massive view counts and named logos. Sophisticated buyers have heard this song before — and a lot of them have been burned by it.</p>
+    <div class="comp-grid">
+      <div class="comp-card">
+        <div class="name">Plutus Media</div>
+        <div class="tag">Creator-led growth for consumer apps. Strategy-first, paid-integrated.</div>
+        <div class="stats"><span>$20K–55K+</span><span>2B+ views</span><span>3 platforms</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="name">Social Launchpad</div>
+        <div class="tag">"A partnership, not a vendor." Apps + ecom, embedded growth team.</div>
+        <div class="stats"><span>Custom $</span><span>1B+ views</span><span>2 platforms</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="name">Ki Marketing</div>
+        <div class="tag">Full-stack UGC for B2C SaaS + apps. SideShift's own training partner.</div>
+        <div class="stats"><span>Custom $</span><span>600M+ views</span><span>2 platforms</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="name">DTC House</div>
+        <div class="tag">#1 short form for AI/SaaS/tech. 2 creators × 30 videos. Premium tier.</div>
+        <div class="stats"><span>$20,000</span><span>1B+ views</span><span>3 platforms</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4: THE TRAP -->
+<section class="slide dark" data-slide="4">
+  <div class="slide-inner">
+    <div class="slide-label">The trap</div>
+    <h2 class="headline">Don't play the<br/><span class="accent">view-counting game.</span></h2>
+    <p class="sub">Plutus claims 2B+. Social Launchpad claims 1B+. Ki Marketing claims 600M+. DTC claims 1B+. If we try to win on raw numbers, we're competitor #5 at best — and the buyer's eyes glaze over anyway because everyone's playing the same instrument.</p>
+    <div class="callout">
+      The asymmetric move isn't a bigger number.<br/>
+      It's a different <em>kind</em> of claim entirely.
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5: THE MATRIX -->
+<section class="slide" data-slide="5">
+  <div class="slide-inner">
+    <div class="slide-label">Where everyone is — and where nobody is</div>
+    <h2 class="headline smaller">Map them on the axes that actually matter.</h2>
+    <p class="sub">Forget view counts. Look at the dimensions a sophisticated buyer cares about: how much it costs, how fast you ship, what happens if it doesn't work, and who's actually doing the work.</p>
+    <div class="matrix">
+      <table>
+        <thead>
+          <tr>
+            <th class="axis"></th>
+            <th>Plutus</th>
+            <th>S. Launchpad</th>
+            <th>Ki Marketing</th>
+            <th>DTC House</th>
+            <th class="voc">VoC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="axis">Price/month</td><td>$20–55K+</td><td>Custom</td><td>Custom</td><td>$20,000</td><td class="voc-cell">$10,000</td></tr>
+          <tr><td class="axis">Videos/mo</td><td>n/a</td><td>600–1,200 posts</td><td>600–1,200 posts</td><td>60</td><td class="voc-cell">180</td></tr>
+          <tr><td class="axis">Platforms</td><td>3</td><td>2</td><td>2</td><td>3</td><td class="voc-cell">4</td></tr>
+          <tr><td class="axis">First videos live</td><td>Week 4+</td><td>~10 days</td><td>~7 days</td><td>2–3 wks testing</td><td class="voc-cell">7–10 days</td></tr>
+          <tr><td class="axis">Risk-share</td><td class="gap">Refuses</td><td class="gap">None</td><td>14-day cancel</td><td class="gap">None, upfront</td><td class="voc-cell check">50% refund &lt;1M views</td></tr>
+          <tr><td class="axis">Named clients on card</td><td class="gap">No</td><td class="gap">No</td><td>Limited</td><td class="check">Yes (MS, Bolt, ClickUp)</td><td class="voc-cell check">Cluely, Codedex, Fable…</td></tr>
+          <tr><td class="axis">Sells strategy decks</td><td class="gap">Yes</td><td class="gap">Yes</td><td class="gap">Yes</td><td class="gap">Yes</td><td class="voc-cell check">No — just videos</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:24px;">The white space lights up. Nobody puts cash on the line. Nobody ships pure UGC without a strategy-deck wrapper. Nobody hits all four platforms.</p>
+  </div>
+</section>
+
+<!-- SLIDE 6: THE CATEGORY CLAIM -->
+<section class="slide dark" data-slide="6">
+  <div class="slide-inner">
+    <div class="slide-label">Insight #1</div>
+    <h2 class="headline">Native UGC<br/><span class="accent">is the new AI-native.</span></h2>
+    <p class="sub">In 2024–25, "AI-native" became cultural shorthand for <em>built from the ground up for this category — not bolted onto a legacy business.</em> Cluely, Cursor, Perplexity vs. Adobe-with-AI. Sophisticated buyers transfer the same mental model anywhere they shop.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>The other four</h4>
+        <div class="big">Marketing agency<br/><span style="color:var(--text-muted);font-weight:500;font-size:24px;">+ UGC product line</span></div>
+        <p>Discovery phases. Strategy decks. Content-brief retainers. Creative-direction departments. UGC wrapped in consulting overhead. The video is one deliverable among many.</p>
+      </div>
+      <div class="col-card" style="border-color:var(--accent-light); background:rgba(124,58,237,0.08);">
+        <h4>VoC</h4>
+        <div class="big">Native UGC studio<br/><span style="color:var(--accent-light);font-weight:500;font-size:24px;">built by working creators</span></div>
+        <p>No discovery phase. No strategy deck. No content-brief retainer. The deliverable is videos. The operators are creators with their own audiences. First posts live in 7–10 days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: THE PRESSURE TEST -->
+<section class="slide" data-slide="7">
+  <div class="slide-inner">
+    <div class="slide-label">The honest pressure test</div>
+    <h2 class="headline smaller">Ki Marketing has a creator-first claim too.<br/>We need a <span class="accent">sharper</span> distinction.</h2>
+    <p class="sub">Jonathan Ki was a 100M-view creator before building the agency. He literally built SideShift's creator training course. By a loose definition of "native," Ki has a real claim. If a buyer asks Claude "which is most creator-native?", we may not be the only answer.</p>
+    <div class="pressure-test">
+      <div class="lbl">The sharper claim</div>
+      <h4>UGC-pure, not UGC-plus-strategy.</h4>
+      <p>Every other featured agency — Ki included — sells strategy briefs, content roadmaps, or creative-direction work alongside the videos. VoC's deliverable is 180 videos. Period. <strong>Output, not overhead.</strong> That's a knife only our offer mechanics back up.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8: LLM SCREENSHOT TEST -->
+<section class="slide dark" data-slide="8">
+  <div class="slide-inner">
+    <div class="slide-label">Insight #2</div>
+    <h2 class="headline">The buyer has<br/><span class="accent">two readers now.</span></h2>
+    <p class="sub">In 2026, sophisticated B2B buyers screenshot the row of agencies and paste it into Claude/GPT: <em>"Which of these fits my $10K AI consumer app build?"</em> Our card has to be parseable by the human <strong>and</strong> the LLM. Vague taglines die in that comparison.</p>
+    <div class="llm-demo">
+      <div class="panel">
+        <h5>What the human reads</h5>
+        <div class="quote">"Native UGC for AI startups & consumer apps — built by working creators. $10K/month. 50% back if we don't hit 1M views in Month 1."</div>
+      </div>
+      <div class="panel">
+        <h5>What Claude parses</h5>
+        <div class="tokens">
+          category: <span class="t">native UGC</span><br/>
+          audience: <span class="t">AI startups</span> <span class="t">consumer apps</span><br/>
+          price: <span class="t">$10,000/mo</span><br/>
+          volume: <span class="t">180 videos</span> <span class="t">4 platforms</span><br/>
+          guarantee: <span class="t">50% refund</span> <span class="t">&lt;1M views</span><br/>
+          speed: <span class="t">7–10 days</span> first video<br/>
+          proof: <span class="t">Cluely</span> <span class="t">Codedex</span> <span class="t">Fable</span>
+        </div>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:28px;">Every claim has to be a number, a named entity, or a literal category. Adjectives evaporate. "Premium," "world-class," "best-in-class" — discounted to zero by the LLM and skipped by the human.</p>
+  </div>
+</section>
+
+<!-- SLIDE 9: THE BET -->
+<section class="slide dark" data-slide="9">
+  <div class="slide-inner">
+    <div class="slide-label">The bet</div>
+    <h2 class="headline smaller">Three wedges. <span class="accent">One offer.</span></h2>
+    <div class="bet-statement">
+      <span class="accent">"</span>Native UGC for AI startups & consumer apps — built by working creators. First videos in 7–10 days. <span class="accent">50% refund if we don't hit 1M views in Month 1.</span><span class="accent">"</span>
+    </div>
+    <div class="three-wedges">
+      <div class="wedge">
+        <div class="num">1.</div>
+        <h5>Category claim</h5>
+        <p>Native UGC, not marketing agency with UGC. Sets the frame the buyer evaluates everything else through.</p>
+      </div>
+      <div class="wedge">
+        <div class="num">2.</div>
+        <h5>Speed claim</h5>
+        <p>First videos in 7–10 days. Plutus is still in "discovery → strategy" in week 4. Tangible operational difference.</p>
+      </div>
+      <div class="wedge">
+        <div class="num">3.</div>
+        <h5>Consequence claim</h5>
+        <p>50% refund if &lt;1M views Month 1. The only featured agency with cash on the line. Plutus explicitly refuses guarantees.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10: THE PROOF -->
+<section class="slide" data-slide="10">
+  <div class="slide-inner">
+    <div class="slide-label">The proof</div>
+    <h2 class="headline smaller">Every case study clears the 1M bar <span class="accent">by a wide margin.</span></h2>
+    <p class="sub">The refund clause isn't a marketing flourish — it's defensible because the system already produces these results. Five named clients, all verifiable. No "anonymous Finance App, 700M views" stuff that makes sophisticated buyers cringe.</p>
+    <div class="proof-grid">
+      <div class="proof-card">
+        <div class="client">CLUELY</div>
+        <div class="num">20M</div>
+        <div class="label">views · 2 months</div>
+      </div>
+      <div class="proof-card">
+        <div class="client">FABLE</div>
+        <div class="num">10M</div>
+        <div class="label">views · 3 WEEKS</div>
+      </div>
+      <div class="proof-card">
+        <div class="client">CODEDEX</div>
+        <div class="num">10M</div>
+        <div class="label">views · 2 months</div>
+      </div>
+      <div class="proof-card">
+        <div class="client">MAKON AI</div>
+        <div class="num">10M</div>
+        <div class="label">views · 2 months</div>
+      </div>
+      <div class="proof-card">
+        <div class="client">BLACKBOX</div>
+        <div class="num">2M</div>
+        <div class="label">views · 20 days</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:36px;">
+      <strong>The asymmetric proof point:</strong> Fable did 10M views in 3 weeks with <em>3 creators</em>. That breaks the "more creators = more views" mental model the entire market is built on. It's <strong>the</strong> case study to lead with.
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11: WHAT WE LEAVE OUT -->
+<section class="slide" data-slide="11">
+  <div class="slide-inner">
+    <div class="slide-label">Discipline</div>
+    <h2 class="headline smaller">What we deliberately <span class="accent">leave out.</span></h2>
+    <p class="sub">A sharp position is defined as much by what it refuses as by what it claims. These are the temptations we should resist.</p>
+    <div class="leave-out">
+      <div class="lo-item">
+        <div class="x">✕</div>
+        <div class="body">
+          <div class="title">"The AI UGC agency"</div>
+          <div class="why">Locks out Fable, Codedex, Makon. DTC already owns "AI/SaaS." Own the <em>terms</em>, not the niche.</div>
+        </div>
+      </div>
+      <div class="lo-item">
+        <div class="x">✕</div>
+        <div class="body">
+          <div class="title">Billion-view bragging</div>
+          <div class="why">Plutus (2B+) and Social Launchpad (1B+) will outclaim us on volume. Don't play a game you can't win.</div>
+        </div>
+      </div>
+      <div class="lo-item">
+        <div class="x">✕</div>
+        <div class="body">
+          <div class="title">"Mentorship-turned-agency"</div>
+          <div class="why">Too inside-baseball for a cold card. Powerful on a sales call — invisible to a scanner.</div>
+        </div>
+      </div>
+      <div class="lo-item">
+        <div class="x">✕</div>
+        <div class="body">
+          <div class="title">"Cheaper than DTC"</div>
+          <div class="why">"Cheap" reads as low quality. Position as right-priced because we don't carry consulting overhead.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12: THE OUTCOME -->
+<section class="slide" data-slide="12">
+  <div class="slide-inner">
+    <div class="outcome-intro">
+      <div class="slide-label">The outcome</div>
+      <h2 class="headline smaller">What this looks like, <span class="accent">live on SideShift.</span></h2>
+      <p class="sub" style="margin: 0 auto;">Same layout as DTC House's profile. Same sticky pricing card on the right. But every visible element — headline, sub, bullets, proof — has been re-engineered for sophisticated humans <strong>and</strong> the LLMs they screenshot it into.</p>
+      <a href="voc-sideshift-preview.html" target="_blank" class="open-link">
+        Open full preview in new tab
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </a>
+    </div>
+    <div class="outcome-frame">
+      <iframe src="voc-sideshift-preview.html" title="VoC SideShift Discover Preview"></iframe>
+    </div>
+  </div>
+</section>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+const indicator = document.getElementById('navIndicator');
+const progressBar = document.getElementById('progressBar');
+
+function updateProgress() {
+  const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  progressBar.style.width = (scrollPercent * 100) + '%';
+
+  // Find which slide is most visible
+  let currentSlide = 1;
+  slides.forEach((slide, idx) => {
+    const rect = slide.getBoundingClientRect();
+    if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+      currentSlide = idx + 1;
+    }
+  });
+  indicator.textContent = String(currentSlide).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+}
+
+window.addEventListener('scroll', updateProgress);
+updateProgress();
+
+// Arrow key navigation
+let currentIndex = 0;
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    currentIndex = Math.min(currentIndex + 1, slides.length - 1);
+    slides[currentIndex].scrollIntoView({behavior: 'smooth'});
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    currentIndex = Math.max(currentIndex - 1, 0);
+    slides[currentIndex].scrollIntoView({behavior: 'smooth'});
+  }
+});
+
+// Sync currentIndex on scroll
+window.addEventListener('scroll', () => {
+  slides.forEach((slide, idx) => {
+    const rect = slide.getBoundingClientRect();
+    if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+      currentIndex = idx;
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vo Creations — SideShift Discover Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f5f6;
+  --card: #ffffff;
+  --border: #e8e8ea;
+  --border-soft: #efeff1;
+  --text: #0a0a0b;
+  --text-muted: #5e5e66;
+  --text-light: #98989f;
+  --primary: #0a0a0b;
+  --radius: 14px;
+  --radius-sm: 10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: var(--bg); }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  padding-bottom: 60px;
+}
+a { color: inherit; text-decoration: none; }
+
+.shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px 0;
+}
+
+.discover-bar { padding: 8px 0 16px; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: white; border: 1px solid var(--border);
+  padding: 7px 14px 7px 10px; border-radius: 999px;
+  font-weight: 600; font-size: 13px; color: var(--text);
+  cursor: pointer;
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  background: radial-gradient(ellipse at top, #2d1b69 0%, #0a0e2e 45%, #050714 100%);
+  color: white;
+  padding: 64px 32px 96px;
+  text-align: center;
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+.hero::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(124,58,237,0.35) 0%, transparent 50%),
+              radial-gradient(circle at 20% 80%, rgba(59,130,246,0.25) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-inner { position: relative; z-index: 1; }
+.hero h1 {
+  font-size: 38px; font-weight: 800; letter-spacing: -0.8px;
+  text-transform: uppercase; line-height: 1.1; margin-bottom: 18px;
+}
+.hero h1 .accent { color: #c4b5fd; }
+.hero .stat {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 19px; font-weight: 400;
+  margin: 8px 0 22px; opacity: 0.95;
+}
+.hero .platforms {
+  display: flex; justify-content: center; gap: 14px; margin: 18px 0 22px;
+}
+.hero .pf {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  background: white;
+}
+.hero .pf svg { width: 22px; height: 22px; }
+.hero .trusted {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 15px; opacity: 0.85; margin-top: 12px;
+}
+.hero .logo-row {
+  margin-top: 18px; display: flex; justify-content: center;
+  gap: 32px; flex-wrap: wrap; font-weight: 700; font-size: 13.5px;
+  letter-spacing: 0.5px;
+}
+.hero .logo-row span { opacity: 0.92; }
+
+/* PROFILE WRAP */
+.profile-wrap {
+  background: white;
+  padding: 0 32px 36px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  position: relative;
+  border: 1px solid var(--border);
+  border-top: none;
+}
+.logo-circle {
+  width: 64px; height: 64px;
+  background: #0a0a0b;
+  border: 4px solid white;
+  border-radius: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 20px;
+  position: absolute; top: -34px; left: 32px;
+  letter-spacing: -0.5px;
+}
+.copy-btn {
+  position: absolute; top: 24px; right: 24px;
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border); background: white;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-muted);
+}
+
+.profile-header {
+  padding-top: 50px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 24px;
+}
+.profile-header h2 {
+  font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px;
+}
+.profile-header .desc {
+  color: var(--text-muted); font-size: 14px; max-width: 720px; line-height: 1.55;
+}
+
+/* LAYOUT */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* CARDS */
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+.card h3 {
+  font-size: 16px; font-weight: 700; margin-bottom: 14px;
+}
+.card p { margin-bottom: 11px; color: var(--text-muted); line-height: 1.6; }
+.card p:last-child { margin-bottom: 0; }
+.card strong { color: var(--text); font-weight: 700; }
+
+/* PRICING */
+.right-col { position: sticky; top: 16px; }
+.pricing-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.pricing-card .price {
+  font-size: 30px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.5px;
+}
+.tier {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px 16px;
+  margin-bottom: 14px;
+}
+.tier-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.tier-sub {
+  font-size: 10.5px; color: var(--text-light);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  margin-bottom: 12px; font-weight: 600;
+}
+.tier-desc {
+  color: var(--text-muted); font-size: 13px; margin-bottom: 12px; line-height: 1.45;
+}
+.tier-list { list-style: none; }
+.tier-list li {
+  padding: 5px 0 5px 16px; color: var(--text);
+  font-size: 13px; position: relative;
+}
+.tier-list li::before {
+  content: "•"; position: absolute; left: 2px;
+  color: var(--text-light);
+}
+.tier-list li.highlight { color: #0a0a0b; font-weight: 600; }
+.tier-list li.highlight::before { color: #7c3aed; }
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px;
+  border-radius: 9px;
+  font-weight: 600; font-size: 14px;
+  cursor: pointer; margin-top: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+}
+.btn-primary { background: #0a0a0b; color: white; }
+.btn-secondary { background: white; color: #0a0a0b; border-color: var(--border); }
+.btn svg { width: 15px; height: 15px; }
+
+.joined {
+  display: flex; justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+  margin-top: 14px;
+  font-size: 12px; color: var(--text-light);
+}
+
+/* INTRO VIDEO */
+.intro-video {
+  display: flex; gap: 20px; align-items: center;
+}
+.iv-frame {
+  width: 220px; aspect-ratio: 9/16;
+  border-radius: 14px; flex-shrink: 0;
+  background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #7c3aed 100%);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.iv-frame::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+.iv-overlay {
+  position: relative; z-index: 1; text-align: center;
+  width: 100%; padding: 0 16px;
+}
+.iv-play {
+  width: 62px; height: 62px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px; padding-left: 4px;
+}
+.iv-play svg { width: 22px; height: 22px; }
+.iv-meta { color: white; }
+.iv-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.iv-sub {
+  font-size: 11px; opacity: 0.7; letter-spacing: 0.5px;
+  text-transform: uppercase; font-weight: 600;
+}
+.iv-caption {
+  color: var(--text-muted); font-size: 14px; line-height: 1.6;
+  flex: 1;
+}
+@media (max-width: 600px) {
+  .intro-video { flex-direction: column; align-items: flex-start; }
+  .iv-frame { width: 100%; max-width: 280px; margin: 0 auto; }
+}
+
+/* CASE STUDIES */
+.cs-item {
+  display: flex; gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.cs-item:first-of-type { padding-top: 6px; }
+.cs-item:last-of-type { border-bottom: none; padding-bottom: 0; }
+.cs-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #f5f3ff; color: #6d28d9; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+}
+.cs-content { flex: 1; }
+.cs-title { font-weight: 700; font-size: 14.5px; margin-bottom: 12px; }
+.cs-section { margin-bottom: 10px; }
+.cs-section:last-child { margin-bottom: 0; }
+.cs-section .lbl {
+  font-weight: 700; font-size: 12.5px;
+  display: block; margin-bottom: 2px;
+}
+.cs-section .body {
+  color: var(--text-muted); font-size: 13px; line-height: 1.55;
+}
+.cs-proof {
+  display: inline-block; margin-top: 8px; font-size: 12px;
+  color: #2563eb; font-weight: 600;
+}
+
+/* FAQ */
+.faq-item {
+  border-bottom: 1px solid var(--border-soft);
+  padding: 14px 0; cursor: pointer;
+}
+.faq-item:last-child { border-bottom: none; }
+.faq-q {
+  font-weight: 600; font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.faq-q .sign {
+  color: var(--text-light); font-weight: 400; font-size: 18px; line-height: 1;
+}
+.faq-a {
+  color: var(--text-muted); margin-top: 10px;
+  font-size: 13.5px; line-height: 1.6;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.faq-item.open .faq-a { max-height: 400px; }
+.faq-item.open .faq-q .sign { transform: rotate(45deg); }
+
+/* SIDE NOTE - mockup banner */
+.mockup-banner {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #78350f;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .right-col { position: static; }
+  .hero h1 { font-size: 28px; }
+  .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<div class="mockup-banner">
+  <strong>Internal mockup</strong> · This is what VoC's SideShift Discover profile would look like with the proposed positioning. Click the FAQ rows to expand.
+</div>
+
+<div class="discover-bar">
+  <a href="#" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    Discover
+  </a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <h1>NATIVE UGC<br/>for AI startups & <span class="accent">consumer apps</span></h1>
+    <div class="stat">10M+ views in 3 weeks. Real numbers. Named clients.</div>
+    <div class="platforms">
+      <div class="pf" title="TikTok">
+        <svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.1z"/></svg>
+      </div>
+      <div class="pf" title="Instagram">
+        <svg viewBox="0 0 24 24"><defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#feda75"/><stop offset="25%" stop-color="#fa7e1e"/><stop offset="50%" stop-color="#d62976"/><stop offset="75%" stop-color="#962fbf"/><stop offset="100%" stop-color="#4f5bd5"/></linearGradient></defs><path fill="url(#ig)" d="M12 2.16c3.2 0 3.58 0 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s0-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33 0 7.05.07 5.78.13 4.9.33 4.14.63a5.85 5.85 0 0 0-2.13 1.38A5.85 5.85 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91A5.85 5.85 0 0 0 2.01 22a5.85 5.85 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56A5.85 5.85 0 0 0 22 21.99a5.85 5.85 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91A5.85 5.85 0 0 0 21.99 2a5.85 5.85 0 0 0-2.13-1.37c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.41-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg>
+      </div>
+      <div class="pf" title="YouTube">
+        <svg viewBox="0 0 24 24" fill="#ff0000"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>
+      </div>
+      <div class="pf" title="Facebook">
+        <svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.66 4.53-4.66 1.31 0 2.68.23 2.68.23v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z"/></svg>
+      </div>
+    </div>
+    <div class="trusted">Trusted by founders building AI & consumer products</div>
+    <div class="logo-row">
+      <span>CLUELY</span>
+      <span>CODEDEX</span>
+      <span>FABLE</span>
+      <span>MAKON AI</span>
+      <span>BLACKBOX AI</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="profile-wrap">
+  <div class="logo-circle">Vo</div>
+  <div class="copy-btn" title="Copy link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+  </div>
+
+  <div class="profile-header">
+    <h2>Vo Creations</h2>
+    <div class="desc">Native UGC studio for AI startups & consumer apps. 180 videos/month across 4 platforms. First videos live in 7–10 days. 50% refund if we don't hit 1M organic views in Month 1. Built by working creators — not a marketing agency with a UGC product line.</div>
+  </div>
+
+  <div class="layout">
+    <div class="left-col">
+
+      <!-- ABOUT -->
+      <div class="card">
+        <h3>About</h3>
+        <p><strong>Most "UGC agencies" are marketing agencies with a UGC product line. We're the opposite.</strong></p>
+        <p>Vo Creations is a native UGC studio. We don't sell discovery phases, strategy decks, or content-brief retainers. We ship videos. $10K/month gets you 180 unique videos, 3–6 trained creators, distribution across TikTok, Reels, YouTube Shorts and Facebook. First videos go live in 7–10 days — not week 4.</p>
+        <p>Month 1 is a pilot. If we don't drive 1M organic views, you get 50% back. No multi-month lock-in until we've earned it. Performance bonuses kick in above 5M views.</p>
+        <p>We're run by working creators with personal brand audiences — not a faceless agency. That's why our case studies have names attached: <strong>Cluely</strong> (20M views, 20K conversions in 2 months), <strong>Codedex</strong> (10M views, 10K conversions), <strong>Fable</strong> (10M views in 3 weeks with just 3 creators), <strong>Makon AI</strong> (10M views, 2 months), <strong>Blackbox AI</strong> (2M views in 20 days with a 40/60 paid-organic mix).</p>
+        <p>If you want strategy slides and quarterly reviews, look at the other featured agencies. If you want a studio that ships and stands behind the numbers, book a call.</p>
+      </div>
+
+      <!-- INTRO VIDEO -->
+      <div class="card">
+        <h3>Meet the team</h3>
+        <div class="intro-video">
+          <div class="iv-frame">
+            <div class="iv-overlay">
+              <div class="iv-play">
+                <svg viewBox="0 0 24 24" fill="white"><polygon points="6,4 20,12 6,20"/></svg>
+              </div>
+              <div class="iv-meta">
+                <div class="iv-title">Vo Creations · 60s intro</div>
+                <div class="iv-sub">Coming soon</div>
+              </div>
+            </div>
+          </div>
+          <div class="iv-caption">
+            Working creators, not a faceless agency. Watch how we work, who's on the team, and why we ship videos in 7–10 days instead of strategy decks in week 4.
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE STUDIES -->
+      <div class="card">
+        <h3>Case Studies</h3>
+
+        <div class="cs-item">
+          <div class="cs-icon">C</div>
+          <div class="cs-content">
+            <div class="cs-title">Cluely: 20M Views & 20K Conversions in 2 Months</div>
+            <div class="cs-section"><span class="lbl">Challenge</span><div class="body">Cluely had a powerful AI decision-making product but limited exposure beyond an early adopter base. People found the idea interesting, but content wasn't sticky enough to turn curiosity into action.</div></div>
+            <div class="cs-section"><span class="lbl">Solution</span><div class="body">Built a tight bench of 6 creators turned into recurring faces of Cluely. Utility-driven narratives ("stop guessing, start knowing", "I wish I had Cluely sooner") + 600 videos in 2 months with ruthless iteration on watch time and conversion data.</div></div>
+            <div class="cs-section"><span class="lbl">Result</span><div class="body">20M+ organic views, 20,000+ new conversions directly tied to social, 600+ videos produced, just 6 core creators — now a UGC engine repurposed into paid ads.</div></div>
+            <a href="#" class="cs-proof">View proof →</a>
+          </div>
+        </div>
+
+        <div class="cs-item">
+          <div class="cs-icon">F</div>
+          <div class="cs-content">
+            <div class="cs-title">Fable: 10M Views in 3 Weeks with Just 3 Creators</div>
+            <div class="cs-section"><span class="lbl">Challenge</span><div class="body">Reading apps traditionally struggle to break into viral short-form culture. Fable needed proof that organic UGC (not large influencer budgets) could drive scale.</div></div>
+            <div class="cs-section"><span class="lbl">Solution</span><div class="body">Identity-driven storytelling ("what your books say about you") with 3 highly aligned creators. Algorithm-native execution: short, curiosity-based openers + native captions turning introspection into shareable entertainment.</div></div>
+            <div class="cs-section"><span class="lbl">Result</span><div class="body">10M+ organic views in 20 days. 250+ videos. Estimated 50,000–200,000 app installs. Fable positioned as a cultural product, not a utility.</div></div>
+            <a href="#" class="cs-proof">View proof →</a>
+          </div>
+        </div>
+
+        <div class="cs-item">
+          <div class="cs-icon">Cd</div>
+          <div class="cs-content">
+            <div class="cs-title">Codedex: 10M Views & 10K Conversions in 2 Months</div>
+            <div class="cs-section"><span class="lbl">Challenge</span><div class="body">Crowded EdTech space. Students said "I'll start later." Coding still felt "too hard, too serious, too late."</div></div>
+            <div class="cs-section"><span class="lbl">Solution</span><div class="body">4 relatable creators who felt like classmates, not "tech influencers." Narratives that killed excuses ("I failed math but I'm learning to code"). Education disguised as entertainment.</div></div>
+            <div class="cs-section"><span class="lbl">Result</span><div class="body">10M+ organic views, 10,000+ new conversions, 250+ videos, 4–6 core creators. Evergreen UGC repurposed into ads + email + product content.</div></div>
+            <a href="#" class="cs-proof">View proof →</a>
+          </div>
+        </div>
+
+        <div class="cs-item">
+          <div class="cs-icon">M</div>
+          <div class="cs-content">
+            <div class="cs-title">Makon AI: 10M Views in 2 Months for AI SAT Prep</div>
+            <div class="cs-section"><span class="lbl">Challenge</span><div class="body">SAT prep is category-fatigue territory. Most competitors led with features and scores; nobody connected with the real student emotions (pressure, fear of failure).</div></div>
+            <div class="cs-section"><span class="lbl">Solution</span><div class="body">8 aligned creators. Talking-head storytelling — students speaking to students. Story-first, product-second: emotional tension upfront, Makon AI as the turning point.</div></div>
+            <div class="cs-section"><span class="lbl">Result</span><div class="body">10M+ organic views in 2 months. Significant brand awareness lift + product roadmap insights from comment sections.</div></div>
+          </div>
+        </div>
+
+        <div class="cs-item">
+          <div class="cs-icon">B</div>
+          <div class="cs-content">
+            <div class="cs-title">Blackbox AI: 2M Views in 20 Days for a Developer AI Tool</div>
+            <div class="cs-section"><span class="lbl">Challenge</span><div class="body">Technical AI tool — perceived as niche, intimidating, "too advanced" for mass short-form audiences. Avoiding ad-blindness as paid distribution scaled.</div></div>
+            <div class="cs-section"><span class="lbl">Solution</span><div class="body">UGC-first paid ads designed to look identical to organic creator content. 420 paid ad variations. 40/60 paid-to-organic mix. Problem → payoff storytelling.</div></div>
+            <div class="cs-section"><span class="lbl">Result</span><div class="body">2M+ organic views in 20 days. 420 paid ads deployed. Strong engagement from developers and students. Positioned as a daily-use coding assistant.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="card">
+        <h3>FAQ</h3>
+        <div class="faq-item">
+          <div class="faq-q">What makes you "native UGC" versus the others? <span class="sign">+</span></div>
+          <div class="faq-a">The other featured agencies are marketing agencies with a UGC product line — they sell discovery phases, strategy decks, content-brief retainers, and creative direction on top of the videos. We don't. We're a UGC-pure studio: the founders are working creators with personal brand audiences, the deliverable is videos, and the operating model is built around speed-to-content. First videos go live in 7–10 days. We don't sell strategy decks.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Why do you offer a refund when others don't? <span class="sign">+</span></div>
+          <div class="faq-a">Because we'd rather earn the contract every month than lock you in. Below 1M views in Month 1 → 50% refund. Between 1M and 3M → you decide whether to continue. Above 3M → we auto-continue into Months 2 and 3. Every case study we list cleared the 1M threshold by a wide margin, so we're confident putting cash on the line.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Why $10K when DTC House charges $20K? <span class="sign">+</span></div>
+          <div class="faq-a">We don't bundle scripting departments, creative directors, and discovery phases into the price. Our operating model is creators making content with reviewers and campaign optimizers — not a content production studio. You get 180 videos to their 60 — and a refund clause they don't offer.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">How fast do videos go live? <span class="sign">+</span></div>
+          <div class="faq-a">First videos go live 7–10 days after kickoff. No multi-week discovery phase, no strategy deliverable before content. We brief creators, warm up posting accounts, and start shipping. By week 3 we're already iterating on what's working.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Who owns the content rights? <span class="sign">+</span></div>
+          <div class="faq-a">You. 100% full, perpetual usage rights for every video we produce. Use them in paid ads, email, on your product, anywhere. Many clients repurpose our UGC into paid (Cluely, Blackbox) — that's by design.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What's the commitment? <span class="sign">+</span></div>
+          <div class="faq-a">Month 1 is a pilot. If results clear 3M views, the engagement auto-continues for Months 2 and 3. Between 1M and 3M, you choose. Below 1M, you get 50% back and walk. We don't lock you in until we've earned it.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="right-col">
+      <div class="pricing-card">
+        <div class="price">$10,000</div>
+        <div class="tier">
+          <div class="tier-header">
+            <span>UGC@Scale Pilot</span>
+            <span>$10,000</span>
+          </div>
+          <div class="tier-sub">Monthly · Month 1 pilot</div>
+          <div class="tier-desc">Full UGC engine, 180 unique videos, 3–6 trained creators. We earn the 3-month commit after Month 1.</div>
+          <ul class="tier-list">
+            <li>180 unique videos / month</li>
+            <li>3–6 trained creators (dedicated)</li>
+            <li>4 platforms: TikTok, Reels, Shorts, FB</li>
+            <li>First videos live in 7–10 days</li>
+            <li class="highlight">50% refund if &lt;1M views in Month 1</li>
+            <li>Weekly campaign optimization</li>
+            <li>Every video reviewed before posting</li>
+            <li>Performance bonuses above 5M views</li>
+            <li>Full content rights — perpetual</li>
+          </ul>
+        </div>
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Book A Call
+        </button>
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Send Message
+        </button>
+        <div class="joined">
+          <span>Joined</span>
+          <span>Just now</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('click', () => {
+    item.classList.toggle('open');
+  });
+});
+</script>
+
+</body>
+</html>
