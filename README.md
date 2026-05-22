@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vo Creations — vocreations.com
 
-## Getting Started
+UGC agency that trains its own creators through live mentorship. Marketing site built with Next.js (App Router) + Tailwind, deployed on Vercel.
 
-First, run the development server:
+## Brand
+
+- **Tagline:** _make them remember._ (rendered lowercase, in small caps, with the trailing period — the "dot")
+- **Voice:** direct, confident, no fluff. No em dashes in site copy.
+- **Themes:** Agency = amber accent (`#F5A623`) on near-black. Mentorship = green accent (`#5cff7e`).
+
+Use the tagline in metadata, the homepage hero kicker, and the footer. Keep it styled `font-variant: small-caps` so the casing is consistent everywhere.
+
+## Stack
+
+- Next.js 14 (App Router), TypeScript, Tailwind CSS
+- Deployed via Vercel CLI: `vercel deploy --prod`
+- Analytics: Vercel Analytics + GA (`G-1TESF8060F`)
+
+## Key conventions
+
+- Metadata lives in each route's `layout.tsx` (or `page.tsx` for server pages). Root metadata + JSON-LD in `app/layout.tsx`.
+- Shared chrome: `components/Nav.tsx`, `components/Footer.tsx`.
+- SEO history is tracked in `SEO-WORK-DIARY.md`.
+- Conference / QR landing pages live at top-level slugs (`/daniel`, `/danny`, `/thienvu`), `noindex`, standalone (no Nav/Footer).
+- **Inline showcase videos** (vertical UGC clips in `bg-bg-card` cards): always use this exact setup so the first frame shows as a thumbnail on iOS Safari:
+  - `src={`${v.src}#t=0.1`}` — the `#t=0.1` media fragment forces Safari to render the frame at 0.1s instead of a black box (no separate poster image needed).
+  - `playsInline muted loop preload="metadata"`
+  - `onMouseEnter` plays, `onMouseLeave` pauses and resets `currentTime = 0.1` (back to the thumbnail frame, not 0), `onClick` toggles mute.
+  - Reference implementation: `app/page.tsx` (showcase grid). Mirrored in `app/about/page.tsx`. Keep all raw `<video>` blocks identical to this.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev      # local dev at http://localhost:3000
+npm run build    # production build
+vercel deploy --prod   # deploy to vocreations.com
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Creator Leaderboard (`/campaigns/leaderboard`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Password-protected, `noindex` page ranking creators by month-to-date views across active campaigns. Refreshed daily.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Data flow:** an Apps Script bound to the Campaign Tracker Google Sheet builds the snapshot at 06:00 (piggybacks the existing `syncActive()` run), writes the top-10 JSON to a `Leaderboard-Current` tab, and exposes it via a Web App `doGet()`. This page fetches that JSON (server-side, `revalidate: 3600`). Sideshift API keys never leave Apps Script; Vercel only knows the Web App URL and the page password.
 
-## Learn More
+- Reference copy of the Apps Script: [apps-script/campaign-tracker-v2.gs](apps-script/campaign-tracker-v2.gs). Live home is the `4-Automations/Daily Campaign Updates Slack-Descript` project.
+- Page degrades gracefully: if `LEADERBOARD_DATA_URL` is unset or returns no creators, it shows a "warming up" state. No placeholder data is ever rendered.
 
-To learn more about Next.js, take a look at the following resources:
+**Env vars (Vercel):**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Var | Purpose |
+| --- | --- |
+| `LEADERBOARD_DATA_URL` | The Apps Script Web App deployment URL returning the snapshot JSON. |
+| `LEADERBOARD_PASSWORD` | Shared basic-auth password for the page. Rotate quarterly. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Auth is enforced in [middleware.ts](middleware.ts) for `/campaigns/leaderboard*`; any username works, the password must match `LEADERBOARD_PASSWORD`. If `LEADERBOARD_PASSWORD` is unset the route returns 401 (locked, not open).
 
-## Deploy on Vercel
+**Operations:**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Add/remove a brand:** edit the `SIDESHIFT_KEYS` Script Property in the Apps Script project (JSON map of `{ brandName: apiKey }`). No code change, no Vercel change. Next 06:00 run picks it up.
+- **Rotate the password:** update `LEADERBOARD_PASSWORD` in Vercel project settings and redeploy. Share the new value with the creator roster.
+- **Manual rebuild:** in the Apps Script editor, run `buildLeaderboardSnapshot()` directly; then hit the page (or wait for revalidation) to see fresh data.
+- **If the Web App breaks:** the page shows the "warming up" state rather than erroring. Check the Apps Script execution logs, confirm the Web App deployment is still "Anyone with the link", and re-deploy a new version if the URL changed (then update `LEADERBOARD_DATA_URL`).
