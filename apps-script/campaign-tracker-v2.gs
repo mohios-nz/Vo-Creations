@@ -5,11 +5,15 @@
  * Tracker Google Sheet (project "Daily Campaign Updates Slack-Descript").
  *
  * To go live:
- *   1. Paste buildLeaderboardSnapshot(), doGet(), and the helpers below into
- *      the bound Apps Script project (alongside the existing campaign-tracker.gs).
- *   2. Add this as the LAST line of syncActive():
- *          buildLeaderboardSnapshot();
- *      (piggybacks on the existing 06:00 trigger; do NOT add a new trigger)
+ *   1. Paste this file as a NEW Apps Script file in the bound project. Do NOT
+ *      modify the existing campaign-tracker.gs. The leaderboard runs fully
+ *      decoupled (own helpers, own constants, own sheet tabs, reads
+ *      SIDESHIFT_KEYS read-only), so a leaderboard failure cannot affect the
+ *      daily syncActive() Slack/Discord digest.
+ *   2. Install a SEPARATE daily trigger for buildLeaderboardSnapshot at 06:30
+ *      (Apps Script editor > Triggers > + Add Trigger > time-driven, day timer,
+ *      6am-7am). This runs 30 min after the existing syncActive trigger and is
+ *      still off-peak for Cloudflare. Do NOT call it from syncActive().
  *   3. Deploy: Deploy > New deployment > Web App
  *          Execute as: Me   |   Who has access: Anyone with the link
  *      Copy the deployment URL into Vercel env LEADERBOARD_DATA_URL.
