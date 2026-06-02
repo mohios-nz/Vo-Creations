@@ -23,18 +23,11 @@ const team = [
     image: "/videos/team-danny.png",
   },
   {
-    name: "Vincent Lei",
-    role: "UGC Engineer",
-    bio: "Creator coaching and campaign management. Bridges brand strategy and creator execution. +10M views.",
-    initials: "VL",
-    image: "/videos/team-vincent.jpg",
-  },
-  {
     name: "Daniel Yun",
-    role: "UGC Engineer",
-    bio: "LA-based. 100M+ views. Started as a mentorship student at 17, now manages multiple brand campaigns.",
+    role: "CCO (Chief Creative Officer)",
+    bio: "Self-taught. 100M+ views. 6-figure earner. Creative force behind Vo Creations.",
     initials: "DY",
-    image: "/videos/team-daniel.png",
+    image: "/videos/team-daniel.jpg",
   },
 ];
 
@@ -126,14 +119,14 @@ export default function AboutPage() {
               >
                 <div className="relative aspect-[9/16]">
                   <video
-                    src={v.src}
+                    src={`${v.src}#t=0.1`}
                     playsInline
                     muted
                     loop
                     preload="metadata"
                     className="absolute inset-0 w-full h-full object-cover"
                     onMouseEnter={(e) => { const el = e.currentTarget; el.play(); }}
-                    onMouseLeave={(e) => { const el = e.currentTarget; el.pause(); el.currentTime = 0; }}
+                    onMouseLeave={(e) => { const el = e.currentTarget; el.pause(); el.currentTime = 0.1; }}
                     onClick={(e) => { e.currentTarget.muted = !e.currentTarget.muted; }}
                   />
                   <div className="absolute top-3 left-3">
@@ -187,14 +180,14 @@ export default function AboutPage() {
               >
                 <div className="relative aspect-[9/16]">
                   <video
-                    src={v.src}
+                    src={`${v.src}#t=0.1`}
                     playsInline
                     muted
                     loop
                     preload="metadata"
                     className="absolute inset-0 w-full h-full object-cover"
                     onMouseEnter={(e) => { const el = e.currentTarget; el.play(); }}
-                    onMouseLeave={(e) => { const el = e.currentTarget; el.pause(); el.currentTime = 0; }}
+                    onMouseLeave={(e) => { const el = e.currentTarget; el.pause(); el.currentTime = 0.1; }}
                     onClick={(e) => { e.currentTarget.muted = !e.currentTarget.muted; }}
                   />
                   <div className="absolute top-3 left-3">
@@ -401,7 +394,7 @@ export default function AboutPage() {
           Want to work with us?
         </h3>
         <p className="text-base text-text-secondary mb-6">
-          Whether you&apos;re a brand or a future creator — let&apos;s talk.
+          Whether you&apos;re a brand or a future creator, let&apos;s talk.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
