@@ -1,41 +1,46 @@
 # CLAUDE.md — vocreations.com
 
-Router for AI agents. **Read this first, every session.** This repo follows the
-website docs standard: a fact lives in exactly ONE file, and this file points you
-to it.
+<!-- Embedded build rules: website-build-rules v1 (single source: Projects/website-build-rules.md — re-sync, don't hand-edit this block) -->
 
-## Doc map — where facts live
+## What this is
+Marketing site for Vo Creations, a UGC agency that trains its own creators through live mentorship.
 
-- **Present-tense "what is it / how is it wired" →** [docs/SITE.md](docs/SITE.md)
-- **Past-tense "why it changed" →** [docs/DECISIONS.md](docs/DECISIONS.md)
-- **SEO change history →** [SEO-WORK-DIARY.md](SEO-WORK-DIARY.md)
-- **Payments detail →** [docs/stripe-slack-integration.md](docs/stripe-slack-integration.md)
-- **Human onboarding + brand voice →** [README.md](README.md)
+## Stack
+Next.js 14 (App Router), TypeScript, Tailwind CSS. Hosted on Vercel, git-connected (main→prod).
 
-**Discriminators:** present state → SITE; why it changed → DECISIONS; never the
-same fact in both. Within DECISIONS, **the latest entry on a topic wins** (a newer
-entry silently supersedes an older one on the same `topic:` key — recency decides).
+## Run / deploy
+- `npm run dev` — local at http://localhost:3000
+- `npm run build` — production build
+- Deploy: merge to `main`; Vercel's git integration builds and ships to vocreations.com. Do NOT `vercel deploy --prod` from a branch and expect it to stick — the next `main` deploy overwrites it (see DECISIONS `topic: deploy`).
+<!-- docs gate: `npm run docs:check` (scripts/docs-check.mjs) — see website-build-rules.md — Enforcement -->
 
-## Decisions index — consult DECISIONS.md before re-deciding any of these
+## Docs
+- [docs/SITE.md](docs/SITE.md) — how it works now (present tense): wiring, routes, env, payments.
+- [docs/DECISIONS.md](docs/DECISIONS.md) — why / what changed (past tense; latest entry per `topic:` wins).
+- [docs/stripe-slack-integration.md](docs/stripe-slack-integration.md) — payments / webhook detail.
+- [SEO-WORK-DIARY.md](SEO-WORK-DIARY.md) — SEO change history.
+- [README.md](README.md) — human onboarding + brand voice.
 
-- `payments` — no website checkout; direct Stripe links + Slack-only webhook
-- `marketing-2026-06` — guarantee + mentorship reframe shipped (supersedes the old 3M / two-month framing)
-- `leaderboard-trigger` — runs on its own Apps Script trigger, decoupled from `syncActive()`
+## Decisions index (consult DECISIONS.md before re-deciding any of these)
+- `payments` — no website checkout; direct Stripe links; webhook → Slack (#ka-ching)
+- `mercury-webhook` — Mercury bank events → Slack #ka-ching (incoming only)
+- `marketing-2026-06` — guarantee + mentorship reframe (supersedes the old 3M / two-month framing)
+- `leaderboard` — removed 2026-06, rebuilding from scratch; old Apps Script/middleware path scrapped
 - `canonical-domain` — non-www is canonical; www 308-redirects
 - `showcase-video` — `#t=0.1` media fragment for iOS Safari thumbnails
+- `content-assets` — `content/` binaries gitignored, live in Google Drive
+- `docs-standard` — adopted website-build-rules v1 (this doc set + `docs:check`)
 
-## Known-broken / WIP (cap: ~1 screen — if this overflows, stop and fix the code)
+## Known-broken
+<!-- Capped ~1 screen. Each entry: what + recheck-by + clearing condition. Past recheck-by → verify against code, don't trust. -->
+- (none)
 
-Each entry is **dated**. Treat any entry older than 30 days as suspect: verify
-against the code before trusting it. `npm run docs:check` (and CI) fails on any
-entry past 30 days, forcing a re-confirm (bump the date) or delete.
+## Repo conventions
+- **No em dashes in site copy** (use commas/colons/periods). Tagline: _make them remember._ (lowercase, small-caps, trailing dot).
+- Metadata lives in each route's `layout.tsx` (or `page.tsx` for server pages); root metadata + JSON-LD in `app/layout.tsx`.
 
-- (none — repo is clean)
-
-## Standing instructions
-
-- **Deploy:** `vercel deploy --prod` (or push to `main`; Vercel is git-connected).
-- **No em dashes** in site copy. Tagline: _make them remember._ (lowercase, small-caps, trailing dot).
-- When you change wiring or env vars, update [docs/SITE.md](docs/SITE.md) **and** `.env.example` in the same change (`npm run docs:check` enforces env↔code sync).
-- When you make a non-obvious call, append it to [docs/DECISIONS.md](docs/DECISIONS.md) **and** add a one-line `topic` to the Decisions index above.
-- Run `npm run docs:check` before pushing.
+## Doc-discipline rules (do every session)
+- Touched wiring? Update [docs/SITE.md](docs/SITE.md) in the same change. SITE points at `app/` + `.env.example`, never copies them.
+- Made a non-obvious choice? Append a past-tense [docs/DECISIONS.md](docs/DECISIONS.md) entry (and a line in the Decisions index above). If it constrains code, leave `// DECISION yyyy-mm: <what> — see docs/DECISIONS.md` at the code site.
+- Keep Known-broken current: each entry carries a `recheck-by` + clearing condition; delete when fixed.
+- Present = SITE, past = DECISIONS; no fact in both. Run `npm run docs:check` before pushing.

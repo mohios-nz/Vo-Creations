@@ -53,28 +53,3 @@ Full reference: [docs/stripe-slack-integration.md](docs/stripe-slack-integration
 | `SLACK_WEBHOOK_URL` | Slack Incoming Webhook for notifications |
 
 Unused, safe to delete from Vercel later: `STRIPE_PRICE_FULL` and `STRIPE_PRICE_PLAN` (removed website checkout), and `GOOGLE_SHEET_WEBHOOK` (removed Sheets logging).
-
-## Creator Leaderboard (`/campaigns/leaderboard`)
-
-Password-protected, `noindex` page ranking creators by month-to-date views across active campaigns. Refreshed daily.
-
-**Data flow:** an Apps Script bound to the Campaign Tracker Google Sheet builds the snapshot daily at 06:30 on its own dedicated time-driven trigger, fully decoupled from the existing `syncActive()` digest (so a leaderboard failure cannot take down the daily Slack/Discord digest). It writes the top-10 JSON to a `Leaderboard-Current` tab and exposes it via a Web App `doGet()`. This page fetches that JSON (server-side, `revalidate: 3600`). Sideshift API keys never leave Apps Script; Vercel only knows the Web App URL and the page password.
-
-- Reference copy of the Apps Script: [apps-script/campaign-tracker-v2.gs](apps-script/campaign-tracker-v2.gs). Live home is the `4-Automations/Daily Campaign Updates Slack-Descript` project.
-- Page degrades gracefully: if `LEADERBOARD_DATA_URL` is unset or returns no creators, it shows a "warming up" state. No placeholder data is ever rendered.
-
-**Env vars (Vercel):**
-
-| Var | Purpose |
-| --- | --- |
-| `LEADERBOARD_DATA_URL` | The Apps Script Web App deployment URL returning the snapshot JSON. |
-| `LEADERBOARD_PASSWORD` | Shared basic-auth password for the page. Rotate quarterly. |
-
-Auth is enforced in [middleware.ts](middleware.ts) for `/campaigns/leaderboard*`; any username works, the password must match `LEADERBOARD_PASSWORD`. If `LEADERBOARD_PASSWORD` is unset the route returns 401 (locked, not open).
-
-**Operations:**
-
-- **Add/remove a brand:** edit the `SIDESHIFT_KEYS` Script Property in the Apps Script project (JSON map of `{ brandName: apiKey }`). No code change, no Vercel change. Next 06:30 run picks it up.
-- **Rotate the password:** update `LEADERBOARD_PASSWORD` in Vercel project settings and redeploy. Share the new value with the creator roster.
-- **Manual rebuild:** in the Apps Script editor, run `buildLeaderboardSnapshot()` directly; then hit the page (or wait for revalidation) to see fresh data.
-- **If the Web App breaks:** the page shows the "warming up" state rather than erroring. Check the Apps Script execution logs, confirm the Web App deployment is still "Anyone with the link", and re-deploy a new version if the URL changed (then update `LEADERBOARD_DATA_URL`).
