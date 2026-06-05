@@ -27,7 +27,7 @@ export function CreatorCard({ creator }: { creator: Creator }) {
         {platformLinks.map(({ key, Icon, label }) => {
           const url = creator.profiles[key];
           if (!url) return (
-            <span key={key} className="text-text-dim/30" title={`${label} — not active`}>
+            <span key={key} className="text-text-dim/30" title={`${label}: not active`}>
               <Icon className="w-4 h-4" />
             </span>
           );

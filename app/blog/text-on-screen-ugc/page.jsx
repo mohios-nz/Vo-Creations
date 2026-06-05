@@ -20,7 +20,7 @@ const articleJsonLd = {
   "@type": "Article",
   headline: "Why Text-On-Screen UGC Is Killing Your App Growth",
   description:
-    "Everyone is producing UGC. Almost nobody is getting results. 20M+ views, 3 creators, $10K campaign cost — here's what actually works.",
+    "Everyone is producing UGC. Almost nobody is getting results. 20M+ views, 3 creators, $10K campaign cost. Here's what actually works.",
   image: "https://vocreations.com/blog/text-vs-talking.jpg",
   datePublished: "2026-03-24T00:00:00Z",
   dateModified: "2026-03-24T00:00:00Z",
@@ -59,7 +59,7 @@ export default function TextOnScreenUGC() {
 
       <BlogImage
         src="/blog/text-vs-talking.jpg"
-        alt="Text-on-screen vs talking-head storytelling — side by side comparison"
+        alt="Text-on-screen vs talking-head storytelling, side by side comparison"
         wide
       />
 
@@ -87,7 +87,7 @@ export default function TextOnScreenUGC() {
         </p>
         <p>
           It&apos;s not that UGC doesn&apos;t work. It&apos;s that text-on-screen isn&apos;t UGC.
-          It&apos;s a format that looked like UGC for about six months in 2023 — and the algorithm
+          It&apos;s a format that looked like UGC for about six months in 2023, and the algorithm
           moved on. Most brands didn&apos;t.
         </p>
         <p>
@@ -100,7 +100,7 @@ export default function TextOnScreenUGC() {
 
       <EmphasisBlock>
         People don&apos;t buy products they feel nothing about. They buy products that made them feel
-        understood, seen, or excited — before they even opened the app store.
+        understood, seen, or excited, before they even opened the app store.
       </EmphasisBlock>
 
       <SectionHeading>What Real UGC Is</SectionHeading>
@@ -114,7 +114,7 @@ export default function TextOnScreenUGC() {
         <p>
           The best-performing UGC we&apos;ve ever made follows the same structure: a creator looks
           into the camera and tells a story that the target audience has lived. The product shows up
-          naturally — not as a pitch, but as part of the story.
+          naturally, not as a pitch, but as part of the story.
         </p>
         <p>
           This isn&apos;t theory. This is what we&apos;ve tested across dozens of campaigns, millions
@@ -135,14 +135,14 @@ export default function TextOnScreenUGC() {
 
       <Prose>
         <p>
-          If your instinct is &ldquo;I need to explain what my product does&rdquo; — you&apos;re
+          If your instinct is &ldquo;I need to explain what my product does,&rdquo; you&apos;re
           thinking about this wrong. Nobody cares what your product does. They care about how it
           makes them <em>feel</em>.
         </p>
         <p>
           The reason talking-head storytelling outperforms everything else is simple: it triggers
           mirror neurons. When a viewer sees someone who looks like them, talks like them, and
-          describes a problem they&apos;ve actually experienced — the brain doesn&apos;t process it
+          describes a problem they&apos;ve actually experienced, the brain doesn&apos;t process it
           as an ad. It processes it as a conversation.
         </p>
         <p>
@@ -151,7 +151,7 @@ export default function TextOnScreenUGC() {
         </p>
       </Prose>
 
-      <BlogYouTube videoId="xL3zWBso9mw" caption="Thienvu Vo — the story behind Vo Creations" />
+      <BlogYouTube videoId="xL3zWBso9mw" caption="Thienvu Vo: the story behind Vo Creations" />
 
       <SectionHeading>What Storytelling Does That Captions Never Can</SectionHeading>
 
@@ -180,7 +180,7 @@ export default function TextOnScreenUGC() {
         <p>
           <strong style={{ color: "#F5EDE3" }}>1. Builds brand equity.</strong> Every talking-head video
           that resonates adds to a compounding library of trust signals. Text-on-screen is
-          disposable — you watch it, get the info, and forget the brand. Storytelling creates
+          disposable. You watch it, get the info, and forget the brand. Storytelling creates
           emotional memory. The viewer remembers how the video made them feel, and that feeling gets
           attached to the brand.
         </p>
@@ -188,13 +188,13 @@ export default function TextOnScreenUGC() {
           <strong style={{ color: "#F5EDE3" }}>2. Creates the conversion window.</strong> The moment a
           viewer thinks &ldquo;this is exactly what I needed&rdquo; is the moment they convert. Text
           doesn&apos;t create that moment. A story about a student who failed three exams and then
-          found the tool that changed everything — that creates the moment.
+          found the tool that changed everything. That creates the moment.
         </p>
         <p>
           <strong style={{ color: "#F5EDE3" }}>3. Becomes a paid ad.</strong> The best organic content
           is also the best ad creative. When a talking-head video goes viral organically, you
           already know the story, hook, and emotional arc work. You just put budget behind it. With
-          text-on-screen, you&apos;re always guessing — because there&apos;s no story to validate.
+          text-on-screen, you&apos;re always guessing, because there&apos;s no story to validate.
         </p>
       </Prose>
 
@@ -212,9 +212,9 @@ export default function TextOnScreenUGC() {
         </p>
         <p>
           When a talking-head video resonates, the comments fill with people saying &ldquo;I needed
-          this,&rdquo; &ldquo;where was this when I was struggling,&rdquo; &ldquo;link??&rdquo; —
+          this,&rdquo; &ldquo;where was this when I was struggling,&rdquo; &ldquo;link??&rdquo;,
           and tagging friends. That comment section becomes a live testimonial wall. Every new viewer
-          doesn&apos;t just see the video — they see 500 people validating the product underneath
+          doesn&apos;t just see the video. They see 500 people validating the product underneath
           it.
         </p>
         <p>
@@ -234,14 +234,14 @@ export default function TextOnScreenUGC() {
       <BlogImage
         src="/blog/analytics-dashboard.jpg"
         alt="Campaign analytics: 20.6M views, 1.2M engagement, 1.2M likes, 28.5K comments, 16.7K shares"
-        caption="Real campaign dashboard — 20.6M views in 30 days"
+        caption="Real campaign dashboard: 20.6M views in 30 days"
       />
 
       <Prose>
         <p>
           No text on screen. No AI clone. Just real people telling stories that made viewers feel
-          something. That&apos;s how we generated 20 million views in 30 days for a single campaign
-          — with 3 creators and a $10K budget.
+          something. That&apos;s how we generated 20 million views in 30 days for a single campaign,
+          with 3 creators and a $10K budget.
         </p>
         <p>
           The equivalent ad spend to reach the same audience? Roughly $200K. And paid ads
@@ -264,12 +264,12 @@ export default function TextOnScreenUGC() {
           {
             title: "Stop optimizing the wrong things",
             content:
-              "Video length, hashtags, posting time — none of it matters if the story doesn't land. The only thing that determines if a video converts is whether the viewer felt something.",
+              "Video length, hashtags, posting time. None of it matters if the story doesn't land. The only thing that determines if a video converts is whether the viewer felt something.",
           },
           {
             title: "Cast the right person",
             content:
-              "The creator has to look, talk, and feel like the person watching. A study tool? College student. A dev tool? Developer. Authenticity isn't about acting — it's about casting someone who's actually felt the problem.",
+              "The creator has to look, talk, and feel like the person watching. A study tool? College student. A dev tool? Developer. Authenticity isn't about acting. It's about casting someone who's actually felt the problem.",
           },
           {
             title: "Show, don't pitch",
@@ -287,7 +287,7 @@ export default function TextOnScreenUGC() {
       <Prose>
         <p>
           The UGC market is projected to grow from ~$10B to $35B+ by 2030. AI content is flooding
-          every feed — which makes authentic human storytelling more valuable, not less.
+          every feed, which makes authentic human storytelling more valuable, not less.
           Text-on-screen had its moment. It&apos;s over.
         </p>
       </Prose>
@@ -296,7 +296,7 @@ export default function TextOnScreenUGC() {
 
       <EndCTA
         headline="Ready to run real UGC?"
-        body="We don't hire creators — we build them through live mentorship. We only take on campaigns we're confident we can perform on."
+        body="We don't hire creators. We build them through live mentorship. We only take on campaigns we're confident we can perform on."
         buttonText="Book a Call"
         buttonHref="https://calendar.app.google/WcipmdbdzGBPHGqz9"
       />

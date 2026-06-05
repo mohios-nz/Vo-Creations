@@ -20,7 +20,7 @@ const stats = [
 const systemCards = [
   { num: "01", title: "Test formats fast", desc: "One new format per day for 7 days. Ship and learn what the algorithm rewards." },
   { num: "02", title: "Cut what doesn't work", desc: "After Week 1, bottom performers get replaced. You only keep winners." },
-  { num: "03", title: "Double down", desc: "Week 2 refines survivors. When something goes viral — every creator triples down." },
+  { num: "03", title: "Double down", desc: "Week 2 refines survivors. When something goes viral, every creator triples down." },
   { num: "04", title: "Talking-head only", desc: "15-40 seconds. Real face. Real voice. No text-on-screen. That's what brands pay for." },
 ];
 
@@ -123,7 +123,7 @@ export default function MentorshipPage() {
 
         <div className="flex flex-col sm:flex-row gap-5 sm:gap-14 mt-[60px] animate-fade-up-delay-4">
           {[
-            ["10M+", "Views generated"],
+            ["100M+", "Views generated"],
             ["90+", "Creators trained"],
             ["30+", "Brand campaigns"],
           ].map(([num, lbl]) => (
@@ -164,7 +164,7 @@ export default function MentorshipPage() {
             There aren&apos;t enough good ones.
           </h2>
           <p className="text-[17px] text-[#555] max-w-[520px] leading-relaxed">
-            UGC — short videos with real faces and voices — is how brands sell now. Not influencers. Not actors. Regular people who tell a story in 30 seconds.
+            UGC, short videos with real faces and voices, is how brands sell now. Not influencers. Not actors. Regular people who tell a story in 30 seconds.
           </p>
         </div>
         <div className="max-w-[1000px] mx-auto mt-10">
@@ -234,11 +234,11 @@ export default function MentorshipPage() {
                   Founder, Vo Creations
                 </div>
                 <p className="text-[15px] text-[#555] leading-relaxed">
-                  Started creating at 18 with zero followers. Built a network of 90+ trained creators generating over 10M views. He teaches the exact system he uses — not theory.
+                  Started creating at 18 with zero followers. Built a network of 90+ trained creators generating over 10M views. He teaches the exact system he uses, not theory.
                 </p>
                 <div className="flex gap-6 mt-4 justify-center md:justify-start">
                   {[
-                    ["10M+", "views"],
+                    ["100M+", "views"],
                     ["90+", "trained"],
                     ["30+", "campaigns"],
                   ].map(([val, label]) => (
@@ -273,7 +273,7 @@ export default function MentorshipPage() {
             You&apos;re not doing this alone.
           </h2>
           <p className="text-[17px] text-[#555] max-w-[500px] mx-auto leading-relaxed mb-10">
-            The community is what creators value most. Not just the content — the people going through it with you.
+            The community is what creators value most. Not just the content, the people going through it with you.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -348,10 +348,10 @@ export default function MentorshipPage() {
           <h2 className="text-[clamp(28px,4vw,44px)] font-extrabold tracking-tighter leading-tight mb-3">
             From zero to paid creator.
             <br />
-            In two months.
+            In 120 days.
           </h2>
           <p className="text-[17px] text-[#555] max-w-[520px] leading-relaxed mb-12">
-            A real skill, a real campaign, and a real network.
+            Four months from setup to full scale, with hands-on support at every step.
           </p>
 
           {/* Timeline */}
@@ -361,27 +361,27 @@ export default function MentorshipPage() {
             {[
               {
                 label: "Month 1",
-                title: "Training",
-                desc: "Formats, storytelling, platform mechanics. ~10 hours/week. Learn by making, not watching.",
+                title: "Onboarding & first paid deal",
+                desc: "1-on-1 onboarding call, niche locked in, content workshopped and brand-ready in your first week. All six modules, templates, and 4 coaching calls every week from day one.",
                 future: false,
               },
               {
                 label: "Month 2",
-                title: "Your first paid campaign",
-                desc: "Create for a real brand. Earn $500 from the agency. This is where you prove it to yourself.",
+                title: "Deal stacking to $3K to $5K/mo",
+                desc: "Second and third deals opened. Unlimited agency access at $30/video minimum plus performance bonuses. Weekly 1-on-1s and portfolio reviews so brands renew and rates climb.",
                 earn: true,
                 future: false,
               },
               {
-                label: "Month 3+",
-                title: "Join the network",
-                desc: "Ongoing brand deals, weekly coaching, creator community. Top creators earn $3–5K/month.",
+                label: "Month 3",
+                title: "Accelerate to $10K+/mo",
+                desc: "Stack high-ticket retainers and break through. Independent outreach system built with 1,000+ brand contacts, proven templates, and the confidence to land deals on your own.",
                 future: true,
               },
               {
-                label: "Year 1+",
-                title: "Full-time creator income",
-                desc: "Grow your portfolio, scale earnings. Work from anywhere. Daniel started exactly where you are.",
+                label: "Month 4",
+                title: "Full scale, your business runs itself",
+                desc: "Audit rates, retainers, and content volume. Build your personal brand flywheel for inbound deals. Most students finish with $10K to $15K/month locked in and a clear path to grow.",
                 future: true,
               },
             ].map((item, i) => (
@@ -404,7 +404,7 @@ export default function MentorshipPage() {
                 </p>
                 {"earn" in item && item.earn && (
                   <div className="inline-flex items-center gap-1.5 bg-[rgba(22,163,74,0.08)] border border-[rgba(22,163,74,0.2)] rounded-full px-[18px] py-2 font-mono text-[13px] font-semibold text-[#16a34a] mt-3.5">
-                    ✓ Earn $500 on your first campaign
+                    ✓ Stack to $3K to $5K/mo
                   </div>
                 )}
               </div>

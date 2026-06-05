@@ -104,8 +104,8 @@ export default function Footer() {
             <div className="text-[11px] text-text-dim uppercase tracking-[0.15em] font-semibold mb-5">
               Ready to scale?
             </div>
-            <p className="text-sm text-text-secondary mb-5">
-              Let&apos;s create viral content for your brand.
+            <p className="text-base text-text [font-variant:small-caps] tracking-wide mb-5">
+              make them remember.
             </p>
             <a
               href="https://calendar.app.google/BMAP5qH6Qwtkm5Yr5"
@@ -114,7 +114,10 @@ export default function Footer() {
               className="inline-flex items-center gap-2 bg-accent text-bg font-bold text-sm px-8 py-3.5 rounded-full hover:shadow-[0_0_32px_rgba(245,166,35,0.3)] hover:-translate-y-px transition-all"
             >
               Start a Project
-              <span className="text-base">&#8599;</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
             </a>
           </div>
         </div>
@@ -130,6 +133,9 @@ export default function Footer() {
             </Link>
             <Link href="/terms" className="text-[13px] text-text-dim hover:text-text-secondary transition-colors">
               Terms
+            </Link>
+            <Link href="/refund-policy" className="text-[13px] text-text-dim hover:text-text-secondary transition-colors">
+              Refunds
             </Link>
           </div>
         </div>

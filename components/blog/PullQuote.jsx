@@ -56,7 +56,7 @@ export default function PullQuote({ children, attribution, variant = "insight" }
             fontStyle: "normal",
           }}
         >
-          — {attribution}
+          {attribution}
         </cite>
       )}
     </blockquote>

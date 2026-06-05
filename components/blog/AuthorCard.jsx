@@ -115,7 +115,7 @@ export default function AuthorCard() {
           }}
         >
           Started creating at 18 with zero followers. Built a network of 90+ trained creators
-          generating 10M+ views across 30+ brand campaigns. Follow for UGC breakdowns, creator
+          generating 100M+ views across 30+ brand campaigns. Follow for UGC breakdowns, creator
           economy insights, and behind-the-scenes of scaling an agency.
         </p>
 

@@ -70,7 +70,7 @@ export default function CreatorsPage() {
 
                 {/* Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-black/85 to-transparent">
-                  <div className="text-sm font-bold">{c.name} — <span className="text-accent font-semibold">{c.months}</span></div>
+                  <div className="text-sm font-bold">{c.name}, <span className="text-accent font-semibold">{c.months}</span></div>
                   <div className="text-xs text-accent mt-0.5 font-semibold">
                     {c.views} views
                   </div>

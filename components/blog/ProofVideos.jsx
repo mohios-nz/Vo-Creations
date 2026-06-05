@@ -166,7 +166,7 @@ export default function ProofVideos() {
           marginTop: "12px",
         }}
       >
-        Real campaign videos — tap to play, click Instagram link to view post
+        Real campaign videos. Tap to play, click Instagram link to view post
       </p>
     </div>
   );

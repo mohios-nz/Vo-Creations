@@ -14,11 +14,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vo Creators — UGC Creator Mentorship Program",
+  alternates: { canonical: "/mentorship" },
+  title: "Vo Creators: UGC Creator Mentorship Program",
   description:
     "Get paid to create UGC content for real brands. No followers needed. No experience required. 2-month live mentorship, then join paid campaigns. Apply now.",
   openGraph: {
-    title: "Vo Creators — UGC Creator Mentorship",
+    title: "Vo Creators: UGC Creator Mentorship",
     description:
       "Get paid to create content for real brands. 2-month live mentorship, then join paid campaigns.",
     type: "website",

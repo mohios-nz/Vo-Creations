@@ -45,7 +45,7 @@ export function ViewsChart({ data }: ViewsChartProps) {
       <div className="flex items-center gap-2 mb-4">
         <span className="font-mono text-xs text-accent font-semibold">PEAK</span>
         <span className="font-mono text-xs text-text-secondary">
-          {peakDate} — {formatNumber(peakDay.views)} views, the campaign&apos;s peak so far
+          {peakDate}: {formatNumber(peakDay.views)} views, the campaign&apos;s peak so far
         </span>
       </div>
 

@@ -19,7 +19,7 @@ import { PostCard } from "./components/PostCard";
 export const metadata: Metadata = {
   title: "Maxxd Campaign · Vo Creations",
   description:
-    "How Vo Creations drove 575K+ organic views for a fitness app in 26 days — without paid media. Real creators, real numbers, real posts.",
+    "How Vo Creations drove 575K+ organic views for a fitness app in 26 days, without paid media. Real creators, real numbers, real posts.",
   openGraph: {
     title: "Maxxd Campaign Case Study · Vo Creations",
     description:
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Maxxd Campaign · Vo Creations",
     description:
-      "575K+ organic views for a fitness app in 26 days — no paid media.",
+      "575K+ organic views for a fitness app in 26 days, no paid media.",
     images: ["/og/maxxd.png"],
   },
 };
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
 const articleJsonLd = {
   "@context": "https://schema.org",
   "@type": "Article",
-  headline: "Maxxd Campaign Case Study — 575K+ Organic Views in 26 Days",
+  headline: "Maxxd Campaign Case Study: 575K+ Organic Views in 26 Days",
   description:
-    "How Vo Creations drove 575K+ organic views for a fitness app launch using 6 trained UGC creators across 4 platforms — without paid media.",
+    "How Vo Creations drove 575K+ organic views for a fitness app launch using 6 trained UGC creators across 4 platforms, without paid media.",
   author: {
     "@type": "Organization",
     name: "Vo Creations",
@@ -81,7 +81,7 @@ export default function MaxxdCampaignPage() {
           </p>
           <p className="text-base sm:text-lg text-text-secondary max-w-2xl leading-relaxed mb-8">
             How Vo Creations drove 575K+ organic views for a fitness app in 26
-            days — without paid media.
+            days, without paid media.
           </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-text-dim">
             <span>Client: {campaignMeta.type}</span>
@@ -113,7 +113,7 @@ export default function MaxxdCampaignPage() {
           <div className="space-y-5 text-[15px] sm:text-base text-text-secondary leading-relaxed">
             <p>
               Maxxd is a fitness app launching into a crowded market. The brief:
-              drive awareness and app installs through organic UGC only — no paid
+              drive awareness and app installs through organic UGC only. No paid
               media, no influencer fees, no agency retainers.
             </p>
             <p>
@@ -121,7 +121,7 @@ export default function MaxxdCampaignPage() {
               YouTube, and Facebook, running a 30-day iterative campaign using the
               VoC Method: test formats in week 1, find the winning hooks, and
               triple down. By day 26, the campaign had generated 575K+ organic
-              views, 262 posts, and over 9,700 engagements — with zero paid
+              views, 262 posts, and over 9,700 engagements, with zero paid
               spend.
             </p>
             <p className="text-text font-medium">
@@ -163,7 +163,7 @@ export default function MaxxdCampaignPage() {
             ))}
           </div>
           <p className="font-mono text-xs text-text-dim mt-8 max-w-xl">
-            YouTube Shorts led the campaign with 59% of total views — proof that
+            YouTube Shorts led the campaign with 59% of total views. Proof that
             Shorts remain the dark horse of organic UGC distribution.
           </p>
         </section>
@@ -205,7 +205,7 @@ export default function MaxxdCampaignPage() {
               {
                 num: "01",
                 title: "Train, don't hire.",
-                body: "6 creators from VoC's in-house mentorship network — trained on talking-head storytelling, hook iteration, and platform-native format. No marketplace randoms.",
+                body: "6 creators from VoC's in-house mentorship network, trained on talking-head storytelling, hook iteration, and platform-native format. No marketplace randoms.",
               },
               {
                 num: "02",
@@ -243,7 +243,7 @@ export default function MaxxdCampaignPage() {
             </h2>
             <p className="text-text-secondary max-w-lg mx-auto mb-8">
               Vo Creations runs 10 new UGC campaigns per month. We don&apos;t
-              hire creators — we build them.
+              hire creators. We build them.
             </p>
             <a
               href="/apply"

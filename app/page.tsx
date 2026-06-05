@@ -7,13 +7,11 @@ import CTABlock from "@/components/CTABlock";
 import Label from "@/components/Label";
 import ResultCard from "@/components/ResultCard";
 
-const logos = ["Blackbox", "Makon", "Codedex", "StudyFetch", "Wispr", "Turbo AI"];
-
 const steps = [
   {
     num: "01",
     title: "Apply and qualify",
-    desc: "We review your product, audience, and goals. Not every brand is a fit — we'll be honest.",
+    desc: "We review your product, audience, and goals. Not every brand is a fit, and we'll be honest about it.",
     time: "Day 1",
   },
   {
@@ -50,13 +48,13 @@ const showcaseVideos = [
 ];
 
 const agencyFaqs = [
-  { q: "How many creators will be on my campaign?", a: "3 vetted creators for Starter, 6 for Growth. Every creator is trained through our mentorship — no freelancers." },
+  { q: "How many creators will be on my campaign?", a: "3 vetted creators for Starter, 6 for Growth. Every creator is trained through our mentorship. No freelancers." },
   { q: "What platforms do you post on?", a: "TikTok, Instagram Reels, YouTube Shorts, and Facebook. All four platforms, simultaneously." },
   { q: "How quickly can a campaign start?", a: "9 days from signed contract to first videos going live. Strategy and creator matching happen in Days 1-2." },
-  { q: "What happens if creators underperform?", a: "We cut underperformers and replace them — that's the VoC Method. Test 7 formats, keep the winners, triple down." },
-  { q: "Do you guarantee views or conversions?", a: "We guarantee minimum view baselines (3M+ for a well-matched product). We don't fake attribution or promise conversion rates we can't prove." },
-  { q: "How is this different from hiring freelance creators?", a: "Our creators are trained through a 2-month mentorship. They know our format system, they've been tested, and they work as a coordinated team — not solo freelancers." },
-  { q: "Can I see examples of past campaigns?", a: "Yes — check the Results section above. We're happy to walk through case studies on a call." },
+  { q: "What happens if creators underperform?", a: "We cut underperformers and replace them. That's the VoC Method. Test 7 formats, keep the winners, triple down." },
+  { q: "Do you guarantee views or conversions?", a: "Yes. 1,000,000 organic views minimum, or 50% of your fee back. Only organic views count toward the guarantee, no paid views. We don't fake attribution or promise conversion rates we can't prove." },
+  { q: "How is this different from hiring freelance creators?", a: "Our creators are trained through a 2-month mentorship. They know our format system, they've been tested, and they work as a coordinated team, not solo freelancers." },
+  { q: "Can I see examples of past campaigns?", a: "Yes. Check the Results section above. We're happy to walk through case studies on a call." },
 ];
 
 const faqJsonLd = {
@@ -86,11 +84,6 @@ export default function Home() {
       <section className="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-[140px] pb-20 relative overflow-hidden">
         <div className="absolute -top-[300px] left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-[radial-gradient(circle,rgba(245,166,35,0.04)_0%,transparent_60%)] pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 bg-accent-dim border border-border-accent rounded-full px-5 py-2 text-xs font-semibold tracking-[1.5px] uppercase text-accent mb-10 animate-fade-down">
-          <span className="w-1.5 h-1.5 bg-green rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.4)]" />
-          Limited availability: 10 new campaigns / month
-        </div>
-
         <h1 className="text-[clamp(36px,6vw,68px)] font-extrabold leading-[1.05] tracking-tighter mb-6 animate-fade-up-delay-1">
           We don&apos;t hire creators.
           <br />
@@ -119,15 +112,20 @@ export default function Home() {
           </a>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-5 sm:gap-14 mt-[72px] animate-fade-up-delay-4">
+        <div className="grid grid-cols-2 sm:flex sm:flex-row sm:gap-14 mt-[64px] sm:mt-[72px] w-full max-w-[320px] sm:w-auto sm:max-w-none mx-auto animate-fade-up-delay-4">
           {[
             ["100M+", "Views generated"],
             ["30+", "Brands scaled"],
             ["100+", "Trained creators"],
             ["9", "Days to launch"],
-          ].map(([num, lbl]) => (
-            <div key={lbl} className="text-center">
-              <div className="text-[32px] font-extrabold tracking-tighter leading-none">
+          ].map(([num, lbl], i) => (
+            <div
+              key={lbl}
+              className={`text-center py-6 sm:py-0 ${
+                i % 2 === 0 ? "border-r border-border sm:border-r-0" : ""
+              } ${i < 2 ? "border-b border-border sm:border-b-0" : ""}`}
+            >
+              <div className="text-[28px] sm:text-[32px] font-extrabold tracking-tighter leading-none">
                 {num}
               </div>
               <div className="text-[11px] font-medium text-text-dim tracking-wide uppercase mt-2">
@@ -137,18 +135,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* LOGO BAR */}
-      <div className="flex flex-wrap gap-12 justify-center py-5 px-6 border-t border-b border-border bg-bg-subtle">
-        {logos.map((name) => (
-          <span
-            key={name}
-            className="text-[13px] text-text-dim font-medium opacity-60"
-          >
-            {name}
-          </span>
-        ))}
-      </div>
 
       {/* CONTENT THAT GOES VIRAL */}
       <section className="py-[100px]">
@@ -169,14 +155,14 @@ export default function Home() {
               >
                 <div className="relative aspect-[9/16]">
                   <video
-                    src={v.src}
+                    src={`${v.src}#t=0.1`}
                     playsInline
                     muted
                     loop
                     preload="metadata"
                     className="absolute inset-0 w-full h-full object-cover"
                     onMouseEnter={(e) => { const el = e.currentTarget; el.play(); }}
-                    onMouseLeave={(e) => { const el = e.currentTarget; el.pause(); el.currentTime = 0; }}
+                    onMouseLeave={(e) => { const el = e.currentTarget; el.pause(); el.currentTime = 0.1; }}
                     onClick={(e) => { e.currentTarget.muted = !e.currentTarget.muted; }}
                   />
                   <div className="absolute top-3 left-3 flex flex-col gap-1">
@@ -260,47 +246,42 @@ export default function Home() {
             Every platform&apos;s algorithm rewards authentic human content. A real face converts better than text overlays.
           </p>
 
-          {/* Comparison table */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-accent/[0.04] rounded-2xl p-6 border border-accent/20">
-              <div className="text-xs text-accent font-semibold uppercase tracking-wide mb-4">
+          {/* Comparison — row-based table */}
+          <div className="mb-8 border-t border-border">
+            {/* Header */}
+            <div className="grid grid-cols-2 md:grid-cols-[140px_1fr_1fr] gap-4 md:gap-6 py-4 border-b border-border">
+              <div className="hidden md:block"></div>
+              <div className="text-[11px] text-accent font-semibold uppercase tracking-wider">
                 Vo Creations
               </div>
-              <div className="space-y-3">
-                {[
-                  ["Format", "Talking-head storytelling"],
-                  ["Length", "15–40 seconds"],
-                  ["Why it works", "Authentic. Feels like a friend's recommendation. Platforms reward faces."],
-                  ["Creator skill", "High — trained through mentorship"],
-                  ["Scroll-stop power", "A real face holds attention"],
-                ].map(([label, val]) => (
-                  <div key={label}>
-                    <div className="text-[11px] text-text-dim uppercase tracking-wide font-medium mb-0.5">{label}</div>
-                    <div className="text-sm text-text-secondary leading-snug">{val}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-bg-card rounded-2xl p-6 border border-border opacity-60">
-              <div className="text-xs text-text-dim font-semibold uppercase tracking-wide mb-4">
+              <div className="text-[11px] text-text-dim font-semibold uppercase tracking-wider">
                 Most UGC agencies
               </div>
-              <div className="space-y-3">
-                {[
-                  ["Format", "Text-on-screen, mixed formats"],
-                  ["Length", "Varies (15s–3min)"],
-                  ["Why it fails", "Looks more \"produced.\" Platforms are deprioritizing it."],
-                  ["Creator skill", "Low — anyone can overlay text"],
-                  ["Scroll-stop power", "Text competes with every other text overlay"],
-                ].map(([label, val]) => (
-                  <div key={label}>
-                    <div className="text-[11px] text-text-dim uppercase tracking-wide font-medium mb-0.5">{label}</div>
-                    <div className="text-sm text-text-secondary leading-snug">{val}</div>
-                  </div>
-                ))}
-              </div>
             </div>
+            {[
+              ["Format", "Talking-head storytelling", "Text-on-screen, mixed formats"],
+              ["Length", "15–40 seconds", "Varies (15s–3min)"],
+              ["Why it works", "Authentic. Feels like a friend's recommendation.", "Looks “produced.” Platforms are deprioritizing it."],
+              ["Creator skill", "High, from mentorship training", "Low, anyone can overlay text"],
+              ["Scroll-stop", "A real face holds attention", "Text competes with every other overlay"],
+            ].map(([label, vo, others]) => (
+              <div
+                key={label}
+                className="grid grid-cols-2 md:grid-cols-[140px_1fr_1fr] gap-x-4 md:gap-x-6 gap-y-3 py-5 border-b border-border last:border-b-0"
+              >
+                <div className="col-span-2 md:col-span-1 text-[11px] text-text-dim uppercase tracking-wide font-semibold">
+                  {label}
+                </div>
+                <div className="flex gap-2 items-start">
+                  <span className="text-accent leading-snug shrink-0">&#10003;</span>
+                  <span className="text-sm text-text leading-snug">{vo}</span>
+                </div>
+                <div className="flex gap-2 items-start">
+                  <span className="text-text-dim leading-snug shrink-0">&#10007;</span>
+                  <span className="text-sm text-text-dim leading-snug">{others}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
           <p className="text-sm text-text-secondary leading-relaxed">
@@ -414,17 +395,17 @@ export default function Home() {
             <ResultCard
               company="Fable"
               tags={["Social reading app", "Palo Alto", "$28M raised", "Tiger Global, Redpoint"]}
-              views="24M"
+              views="25.4M"
               viewsSub="4 weeks / 3 creators"
               quote="Vo Creations delivered 3M views in just 7 days. Their creators truly understand how to create content that resonates."
               quoteSource="Fable team"
               challenge="Break through in competitive book discovery. Traditional marketing wasn't reaching Gen Z readers where they spend time."
               approach="3 creators, 180 videos, 4 platforms. Applied the VoC Method: 7 format experiments in week 1, tracked performance, cut the bottom 4 formats, tripled down on the winners. One talking-head format hit 3.5M views. Every creator pivoted."
-              result="24M total views in 30 days. The methodology that now powers every VoC campaign was born here."
+              result="25.4M total views in 30 days. The methodology that now powers every VoC campaign was born here."
               miniStats={[
                 { value: "180", label: "Videos" },
                 { value: "3", label: "Creators" },
-                { value: "3.5M", label: "Top video" },
+                { value: "25.4M", label: "Total views" },
                 { value: "30", label: "Days" },
               ]}
             />
@@ -432,15 +413,15 @@ export default function Home() {
             <ResultCard
               company="Codedex"
               tags={["Learn-to-code platform", "Brooklyn, NY", "$1M raised", "Hustle Fund, Goodwater"]}
-              views="15M"
+              views="10M+"
               viewsSub="2 months"
               quote="We tried influencer marketing before, but Vo Creations gave us 10x the results at a fraction of the cost."
               quoteSource="Codedex team"
               challenge="Reach Gen Z developers. Technical audience, hard to engage with traditional marketing."
               approach="Matched creators who are actual developers from our network. Content that spoke the audience's language authentically."
-              result="15M views in 2 months. Strong community engagement and meaningful user acquisition."
+              result="10M+ views in 2 months. Strong community engagement and meaningful user acquisition."
               miniStats={[
-                { value: "15M", label: "Views" },
+                { value: "10M+", label: "Views" },
                 { value: "4", label: "Platforms" },
                 { value: "60", label: "Days" },
                 { value: "Gen Z", label: "Audience" },
@@ -450,15 +431,15 @@ export default function Home() {
             <ResultCard
               company="BlackBox AI"
               tags={["AI Developer Tools", "Coding assistant"]}
-              views="10M"
+              views="11.5M"
               viewsSub="20 days / 40-60 paid-organic mix"
               quote="Vo Creations made our paid ads indistinguishable from organic creator content. That's what scaled us."
               quoteSource="BlackBox AI team"
               challenge="AI coding tools are niche and intimidating for mass short-form audiences. Traditional ads triggered ad blindness."
               approach="UGC-first paid ads designed to look identical to organic creator content. Problem → payoff storytelling: open with relatable pain (debugging frustration, time pressure), show BlackBox AI as the unlock. 420 paid ad variations tested with a 40/60 paid-to-organic content mix."
-              result="10M+ organic views in just 20 days. 420 paid ads produced and deployed at scale. Strong engagement from developers, students, and builders asking workflow questions and tagging peers."
+              result="11.5M organic views in just 20 days. 420 paid ads produced and deployed at scale. Strong engagement from developers, students, and builders asking workflow questions and tagging peers."
               miniStats={[
-                { value: "10M+", label: "Views" },
+                { value: "11.5M", label: "Views" },
                 { value: "420", label: "Paid ads" },
                 { value: "20", label: "Days" },
                 { value: "40/60", label: "Paid/organic" },
@@ -468,15 +449,15 @@ export default function Home() {
             <ResultCard
               company="Makon AI"
               tags={["EdTech", "SAT prep", "AI-powered"]}
-              views="5M"
+              views="10.2M"
               viewsSub="2 months / 8 creators"
-              quote="Vo Creations turned SAT prep — one of the hardest categories to make viral — into bingeable short-form content."
+              quote="Vo Creations turned SAT prep, one of the hardest categories to make viral, into bingeable short-form content."
               quoteSource="Makon AI team"
               challenge="SAT prep is perceived as boring and transactional. Most competitors relied on dense demos and jargon that students scrolled past."
-              approach="Creator-led talking-head videos that felt personal and raw — students speaking to students. Story-first, product-second: open with emotional tension (stress, burnout, parental pressure), then naturally introduce Makon AI as the turning point."
-              result="5M+ organic views in 2 months. Comment sections filled with students asking questions, sharing stress, and tagging friends. Makon positioned as a modern, student-first SAT solution."
+              approach="Creator-led talking-head videos that felt personal and raw. Students speaking to students. Story-first, product-second: open with emotional tension (stress, burnout, parental pressure), then naturally introduce Makon AI as the turning point."
+              result="10.2M organic views in 2 months. Comment sections filled with students asking questions, sharing stress, and tagging friends. Makon positioned as a modern, student-first SAT solution."
               miniStats={[
-                { value: "5M+", label: "Views" },
+                { value: "10.2M", label: "Views" },
                 { value: "8", label: "Creators" },
                 { value: "60", label: "Days" },
                 { value: "Gen Z", label: "Audience" },
@@ -493,24 +474,25 @@ export default function Home() {
         <div className="max-w-[720px] mx-auto px-6">
           <Label>What to expect</Label>
           <h2 className="text-[clamp(24px,3.5vw,36px)] font-extrabold tracking-tight mb-6">
-            3 million views.{" "}
-            <span className="text-accent">Minimum.</span>
+            1 million organic views.{" "}
+            <span className="text-accent">Guaranteed.</span>
           </h2>
 
           <div className="space-y-5 text-[15px] text-text-secondary leading-relaxed">
             <p>
-              Baseline: 3M+ impressions in the first month across 4 platforms. Most campaigns land 3–10M. Some go higher when a format breaks through.
+              Baseline: 1M+ organic views in the first month across 4 platforms. Most campaigns land 3–10M. Some go higher when a format breaks through.
             </p>
           </div>
 
-          <div className="mt-8 bg-bg-card rounded-2xl border border-border p-6">
-            <p className="text-sm text-text-secondary leading-relaxed">
-              <strong className="text-text font-semibold">
-                Want guaranteed downloads? We&apos;re not the right fit.
-              </strong>{" "}
-              Want quality content, a proven methodology, and honest reporting? Apply below.
+          <div className="mt-8 bg-bg-card rounded-2xl border border-accent/30 p-6">
+            <div className="text-xs text-accent font-semibold uppercase tracking-wide mb-2">
+              View guarantee
+            </div>
+            <p className="text-base text-text font-semibold">
+              1,000,000 organic views, or 50% refund.
             </p>
           </div>
+
         </div>
       </section>
 
@@ -523,6 +505,59 @@ export default function Home() {
         - Constraint: Talking-head storytelling only (15-40s, never text-on-screen)
       */}
 
+
+      <div className="max-w-[1000px] mx-auto h-px bg-border" />
+
+      {/* PARTNERSHIPS */}
+      <section className="py-[100px]">
+        <div className="max-w-[1000px] mx-auto px-6">
+          <Label>Partnerships</Label>
+          <h2 className="text-[clamp(24px,3.5vw,36px)] font-extrabold tracking-tight mb-2">
+            Who we partner with
+          </h2>
+          <p className="text-base text-text-secondary mb-10">
+            Tools and platforms we work alongside to deliver campaigns at scale.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                name: "SideShift",
+                desc: "UGC operating system we use to recruit creators, run campaigns, track results, and automate payouts.",
+                href: "https://sideshift.app/",
+              },
+              {
+                name: "Content Rewards",
+                desc: "Performance-based creator network that pays out on video results, helping us scale top formats faster.",
+                href: "https://contentrewards.com/",
+              },
+              {
+                name: "Museon",
+                desc: "AI tool that surfaces trending content and generates variations, accelerating our VoC format testing.",
+                href: "https://museon.ai/",
+              },
+            ].map((p) => (
+              <a
+                key={p.name}
+                href={p.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-bg-card rounded-2xl border border-border p-6 hover:border-accent/40 transition-all"
+              >
+                <div className="text-[17px] font-bold tracking-tight mb-2 group-hover:text-accent transition-colors">
+                  {p.name}
+                </div>
+                <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                  {p.desc}
+                </p>
+                <span className="text-[13px] text-accent font-medium">
+                  Visit site &#8599;
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* FAQ */}
       <section className="py-[100px]">

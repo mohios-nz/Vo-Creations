@@ -17,12 +17,15 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "Vo Creations — UGC Agency for Startups & Consumer Apps",
+    default: "Vo Creations: UGC Agency for Startups & Consumer Apps",
     template: "%s | Vo Creations",
   },
   description:
     "Vo Creations is a UGC agency that trains its own creators through live mentorship. 180 talking-head videos across 4 platforms. 9 days to launch. 100M+ views generated for brands like Fable, Cluely, and Codedex.",
   metadataBase: new URL("https://vocreations.com"),
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: [
       { url: "/favicon.png", sizes: "32x32", type: "image/png" },
@@ -31,7 +34,7 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: "Vo Creations — UGC Agency for Startups & Consumer Apps",
+    title: "Vo Creations: Make Them Remember.",
     description:
       "Trained creators. Proven formats. Predictable virality. The only UGC agency that builds its own creator supply chain through mentorship.",
     siteName: "Vo Creations",
@@ -41,13 +44,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Vo Creations — UGC Agency",
+        alt: "Vo Creations: make them remember.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vo Creations — UGC Agency for Startups & Consumer Apps",
+    title: "Vo Creations: Make Them Remember.",
     description:
       "The only UGC agency that trains its own creators. 180 videos, 4 platforms, 9 days to launch.",
     images: ["/og-image.png"],
