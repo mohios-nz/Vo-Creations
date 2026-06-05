@@ -1,16 +1,19 @@
-// Handles Mercury bank webhook events:
-// - transaction.created → Slack
+// Handles Mercury bank webhook events and posts INCOMING payments to Slack.
 //
-// PHASE 1 (current): signature verification + raw debug logging only.
-//   We have not yet seen a real transaction.created payload, so we do NOT
-//   hardcode any amount/direction/counterparty field paths. We just verify the
-//   signature, console.log the full parsed payload, and post a minimal raw
-//   message to Slack. Once a real event is captured, PHASE 2 will add the
-//   incoming-only filter (positive/credit amounts) and the formatted message.
+// Mercury delivers events in its Events API shape (NOT a {type,data} envelope):
+//   { id, resourceType, resourceId, operationType, resourceVersion,
+//     occurredAt, changedPaths, mergePatch, previousValues }
+// For a created transaction the full transaction object lives in `mergePatch`.
+//
+// Transaction amount sign: positive = credit (money in), negative = debit.
+// We only notify on incoming payments (amount > 0); outgoing is ignored.
+//
+// Signature: header "Mercury-Signature: t=<ts>,v1=<sig>",
+//   HMAC-SHA256 over "<ts>.<rawBody>" keyed with the endpoint secret.
 //
 // Env vars needed:
-//   MERCURY_WEBHOOK_SECRET  (new — see notes at bottom of file)
-//   SLACK_WEBHOOK_URL       (reused)
+//   MERCURY_WEBHOOK_SECRET
+//   SLACK_WEBHOOK_URL       (reused; the webhook is bound to #ka-ching)
 
 import crypto from "crypto";
 
@@ -20,6 +23,19 @@ const SLACK_URL = process.env.SLACK_WEBHOOK_URL;
 
 // Reject events whose signed timestamp is older than this (replay protection).
 const MAX_TIMESTAMP_AGE_SECONDS = 5 * 60; // 5 minutes, per Mercury's docs
+
+// Human-friendly labels for Mercury transaction "kind" values.
+const KIND_LABELS = {
+  incomingDomesticWire: "Incoming wire",
+  incomingInternationalWire: "Incoming international wire",
+  checkDeposit: "Check deposit",
+  externalTransfer: "Transfer",
+  internalTransfer: "Internal transfer",
+  treasuryTransfer: "Treasury transfer",
+  creditCardCredit: "Card credit",
+  debitCardCredit: "Card credit",
+  expenseReimbursement: "Reimbursement",
+};
 
 // --- Helpers ---
 
@@ -77,6 +93,78 @@ function verifyMercurySignature(rawBody, header, secret) {
   return crypto.timingSafeEqual(expectedBuf, signatureBuf);
 }
 
+function formatUSD(amount) {
+  try {
+    return amount.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  } catch {
+    return `$${Number(amount).toFixed(2)}`;
+  }
+}
+
+// Build the Slack message for an incoming payment.
+function incomingPaymentMessage(tx) {
+  const from = tx.counterpartyName || "Unknown sender";
+  const nickname = tx.counterpartyNickname ? ` (${tx.counterpartyNickname})` : "";
+  const kind = KIND_LABELS[tx.kind] || tx.kind || "Deposit";
+  const memo = tx.note || tx.externalMemo || tx.bankDescription || "";
+
+  const blocks = [
+    {
+      type: "header",
+      text: { type: "plain_text", text: "💰 Payment received" },
+    },
+    {
+      type: "section",
+      fields: [
+        { type: "mrkdwn", text: `*Amount:*\n${formatUSD(tx.amount)}` },
+        { type: "mrkdwn", text: `*From:*\n${from}${nickname}` },
+        { type: "mrkdwn", text: `*Type:*\n${kind}` },
+        { type: "mrkdwn", text: `*Status:*\n${tx.status || "unknown"}` },
+      ],
+    },
+  ];
+
+  if (memo) {
+    blocks.push({
+      type: "section",
+      text: { type: "mrkdwn", text: `_${memo}_` },
+    });
+  }
+  if (tx.dashboardLink) {
+    blocks.push({
+      type: "context",
+      elements: [
+        { type: "mrkdwn", text: `<${tx.dashboardLink}|View in Mercury>` },
+      ],
+    });
+  }
+  return { blocks };
+}
+
+// Fallback when we receive a transaction event we couldn't parse into the
+// expected shape — post the raw payload so nothing is silently missed and we
+// can refine the parser from a real example.
+function rawMessage(event) {
+  return {
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "🏦 Mercury event (unparsed)" },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "```" + JSON.stringify(event).slice(0, 2800) + "```",
+        },
+      },
+    ],
+  };
+}
+
 // --- Main handler ---
 
 // Health check so Mercury's "Verify endpoint" connectivity probe gets a 200.
@@ -111,40 +199,27 @@ export async function POST(req) {
     return Response.json({ received: true });
   }
 
-  // TODO: Mercury delivers at-least-once, so the same event may arrive more
-  // than once. No idempotency store in v1 — a duplicate Slack ping is harmless.
+  // Log the full payload so the first real events can be inspected in Vercel
+  // logs and the parser refined if Mercury's shape differs from the docs.
+  console.log("Mercury event:", JSON.stringify(event));
 
-  // We only subscribe to transaction.created.
-  if (event?.type === "transaction.created") {
-    // PHASE 1: log the full payload so we can inspect the real shape, then post
-    // a minimal raw message to Slack. No field-path assumptions yet.
-    console.log(
-      "Mercury transaction.created payload:",
-      JSON.stringify(event, null, 2)
-    );
+  // Mercury delivers at-least-once; a duplicate Slack ping is harmless, so no
+  // idempotency store in v1.
 
-    await notifySlack({
-      blocks: [
-        {
-          type: "header",
-          text: { type: "plain_text", text: "🏦 Mercury event received" },
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text:
-              "```" +
-              JSON.stringify({
-                type: event.type,
-                id: event.id,
-                data: event.data,
-              }) +
-              "```",
-          },
-        },
-      ],
-    });
+  // Only act on a newly created transaction.
+  if (event?.resourceType === "transaction" && event?.operationType === "created") {
+    // For a created transaction the object is in mergePatch; fall back
+    // defensively in case the real shape differs from the documented one.
+    const tx = event.mergePatch || event.data || event.resource || {};
+    const amount = typeof tx.amount === "number" ? tx.amount : null;
+
+    if (amount === null) {
+      // Unexpected shape — post raw so it isn't silently dropped.
+      await notifySlack(rawMessage(event));
+    } else if (amount > 0) {
+      // Incoming money only. Outgoing (negative) and zero are ignored.
+      await notifySlack(incomingPaymentMessage(tx));
+    }
   }
 
   // Always ack quickly with a 2xx — Mercury marks delivery failed after 5s and
