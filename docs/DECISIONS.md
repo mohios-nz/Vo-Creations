@@ -69,3 +69,16 @@ Inline showcase `<video>` blocks always use `src={`${v.src}#t=0.1`}` plus
 **Why:** the `#t=0.1` media fragment forces iOS Safari to render the frame at 0.1s
 as a thumbnail instead of a black box — no separate poster image needed. Reference:
 `app/page.tsx`. Keep all raw `<video>` blocks identical.
+
+## topic: content-assets — _2026-06_
+
+Binary/internal assets under `content/` are gitignored (`*.png/jpg/jpeg/webp`
+and `content/UGC Trackr/`); only `content/*.md` notes are tracked. The assets
+(LinkedIn banners, source QR/photo files, and the "UGC Trackr" brief +
+screenshots) live in Google Drive instead.
+
+**Why:** none are referenced by the site (only `public/` is served; the QR/photo
+sources are already duplicated under `public/`). Committing ~15MB of unreferenced
+binaries would bloat git history permanently. The UGC Trackr brief is for a
+separate project (`voc-trackr-internal` → `trackr.vocreations.com`) and, per the
+brief itself, should not live in the marketing repo.

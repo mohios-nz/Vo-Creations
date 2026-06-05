@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# internal/brand assets — large binaries and planning docs live in Google Drive,
+# not this repo (keeps the marketing repo lean). content/*.md notes stay tracked.
+# See docs/DECISIONS.md (topic: content-assets).
+content/**/*.png
+content/**/*.jpg
+content/**/*.jpeg
+content/**/*.webp
+content/UGC Trackr/
