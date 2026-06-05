@@ -38,13 +38,13 @@
 ### No Action Needed
 
 - `go.vocreations.com/6396a168` — old landing page subdomain, DNS record already removed. Google will drop it on its own.
-- "Discovered - currently not indexed" pages (`/about`, `/blog/text-on-screen-ugc`, `/creators`, `/mentorship`, `/mentorship/enroll`) — real pages in sitemap, just awaiting Google crawl.
+- "Discovered - currently not indexed" pages (`/about`, `/blog/text-on-screen-ugc`, `/creators`, `/mentorship`) — real pages in sitemap, just awaiting Google crawl. (`/mentorship/enroll` was later removed entirely along with website checkout, see 2026-06 note below.)
 
 ### Next Steps
 
 - [x] Deploy changes to Vercel
 - [x] Click "Validate Fix" in GSC for: 404s, Duplicate canonical, Alternate canonical, Page with redirect
-- [ ] Use GSC URL Inspection → "Request Indexing" for each of the 5 discovered-but-not-indexed pages
+- [ ] Use GSC URL Inspection → "Request Indexing" for each of the 4 discovered-but-not-indexed pages
 - [ ] Re-check GSC in 1-2 weeks to confirm issues are resolving
 
 ---
@@ -54,3 +54,9 @@
 All 6 issue categories now show **Validation: Started** in GSC. Google is actively recrawling affected URLs. Expected resolution in 1-2 weeks.
 
 Note: GSC property is registered under `www.vocreations.com` — sitemap submission must use the www URL. This is fine since www redirects to non-www.
+
+---
+
+## 2026-06: Website checkout removed
+
+Removed the `/mentorship/enroll` page and the `/api/checkout` route. Mentorship is no longer sold through the website; sales go through direct Stripe payment links sent to buyers. `/mentorship/enroll` was also dropped from the sitemap. Google will drop the URL on its own once it recrawls (expect a "404/removed" status, which is intended).

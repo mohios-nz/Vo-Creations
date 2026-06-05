@@ -36,6 +36,24 @@ npm run build    # production build
 vercel deploy --prod   # deploy to vocreations.com
 ```
 
+## Payments
+
+Mentorship is sold via **direct Stripe payment links** sent to buyers (Thienvu sends them directly). There is **no checkout flow on the website** — the old `/mentorship/enroll` page and `/api/checkout` route were removed.
+
+A Stripe webhook still runs for visibility. `app/api/stripe-webhook/route.js` verifies the Stripe signature and handles `checkout.session.completed`, `invoice.paid` (auto-cancels the subscription after 4 payments), and `invoice.payment_failed`, posting each to Slack. (Google Sheets logging was removed; the webhook posts to Slack only.)
+
+Full reference: [docs/stripe-slack-integration.md](docs/stripe-slack-integration.md). Canonical site overview: [docs/SITE.md](docs/SITE.md).
+
+**Env vars (Vercel):**
+
+| Var | Purpose |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Stripe API calls in the webhook |
+| `STRIPE_WEBHOOK_SECRET` | Verify incoming webhook signatures |
+| `SLACK_WEBHOOK_URL` | Slack Incoming Webhook for notifications |
+
+Unused, safe to delete from Vercel later: `STRIPE_PRICE_FULL` and `STRIPE_PRICE_PLAN` (removed website checkout), and `GOOGLE_SHEET_WEBHOOK` (removed Sheets logging).
+
 ## Creator Leaderboard (`/campaigns/leaderboard`)
 
 Password-protected, `noindex` page ranking creators by month-to-date views across active campaigns. Refreshed daily.

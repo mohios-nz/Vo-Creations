@@ -1,13 +1,12 @@
 // Handles Stripe webhook events:
-// - New enrollment → Slack + Google Sheet
-// - Payment received (tracks count, cancels after 4) → Slack + Google Sheet
-// - Payment failed → Slack + Google Sheet
+// - New enrollment → Slack
+// - Payment received (tracks count, cancels after 4) → Slack
+// - Payment failed → Slack
 //
 // Env vars needed:
 //   STRIPE_SECRET_KEY
 //   STRIPE_WEBHOOK_SECRET
 //   SLACK_WEBHOOK_URL
-//   GOOGLE_SHEET_WEBHOOK (Google Apps Script web app URL)
 
 import Stripe from "stripe";
 
@@ -18,7 +17,6 @@ function getStripe() {
 }
 
 const SLACK_URL = process.env.SLACK_WEBHOOK_URL;
-const SHEET_URL = process.env.GOOGLE_SHEET_WEBHOOK;
 
 // --- Helpers ---
 
@@ -33,23 +31,6 @@ async function notifySlack(message) {
   } catch (err) {
     console.error("Slack notification failed:", err);
   }
-}
-
-async function logToSheet(data) {
-  if (!SHEET_URL) return;
-  try {
-    await fetch(SHEET_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-  } catch (err) {
-    console.error("Google Sheet logging failed:", err);
-  }
-}
-
-function formatDate() {
-  return new Date().toISOString().split("T")[0];
 }
 
 // --- Main handler ---
@@ -102,16 +83,6 @@ export async function POST(req) {
             ],
           },
         ],
-      });
-
-      await logToSheet({
-        date: formatDate(),
-        name,
-        email,
-        plan,
-        amount: `$${amount}`,
-        payment_number: plan === "Pay in Full" ? "1/1" : "1/4",
-        status: "Paid",
       });
 
       break;
@@ -199,19 +170,6 @@ export async function POST(req) {
         });
       }
 
-      // Log every payment to the sheet (skip first — already logged by checkout.session.completed)
-      if (paidCount > 1) {
-        await logToSheet({
-          date: formatDate(),
-          name,
-          email,
-          plan: "Payment Plan",
-          amount: `$${amount}`,
-          payment_number: `${paidCount}/4`,
-          status: paidCount >= 4 ? "Plan Complete" : "Paid",
-        });
-      }
-
       break;
     }
 
@@ -256,16 +214,6 @@ export async function POST(req) {
             },
           },
         ],
-      });
-
-      await logToSheet({
-        date: formatDate(),
-        name,
-        email,
-        plan: "Payment Plan",
-        amount: `$${amount}`,
-        payment_number: `Attempt ${attempt}`,
-        status: "Failed",
       });
 
       break;

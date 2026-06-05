@@ -35,12 +35,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
     {
-      url: `${base}/mentorship/enroll`,
-      lastModified: new Date("2026-03-26"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
       url: `${base}/blog`,
       lastModified: new Date("2026-03-24"),
       changeFrequency: "weekly",
