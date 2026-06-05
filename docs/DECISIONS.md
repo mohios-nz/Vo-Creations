@@ -1,0 +1,71 @@
+# DECISIONS — vocreations.com
+
+Past-tense log of non-obvious calls: **why** something is the way it is, and what
+changed. Append-only. Each entry has a `topic` key and a date.
+
+**Reading rule:** the **latest entry on a `topic` wins.** A newer entry on the
+same topic supersedes older ones (recency decides) — you do not need to find and
+edit the old entry. For present-tense "how it works now," see
+[SITE.md](SITE.md); this file is only the why/history.
+
+---
+
+## topic: payments — _2026-06_
+
+Removed the website checkout (`app/mentorship/enroll/` page and `app/api/checkout/`
+route) and the Google Sheets logging in the Stripe webhook (`logToSheet`,
+`GOOGLE_SHEET_WEBHOOK`).
+
+**Why:** mentorship is no longer sold through the website — sales go via direct
+Stripe payment links sent to buyers. Payment visibility is handled by Slack
+notifications alone, so the Sheets path and the on-site checkout were dead weight.
+The webhook (`app/api/stripe-webhook/route.js`) stays, posting to Slack only.
+`STRIPE_PRICE_FULL` / `STRIPE_PRICE_PLAN` / `GOOGLE_SHEET_WEBHOOK` are now unused
+in Vercel (safe to delete).
+
+## topic: marketing-2026-06 — _2026-06_
+
+Shipped a marketing refresh. Supersedes the previous framing.
+
+- **Guarantee** (homepage): now "1,000,000 organic views minimum, or 50% of your
+  fee back" — replaces the old "3M+ view baselines" language. (Note: `/creators`
+  still references "3M+"; left as-is, not yet reconciled.)
+- **Mentorship:** reframed as a 4-month path toward $10–15K/month, replacing the
+  old "two months / $3–5K" framing.
+- **New routes:** `/daniel`, `/danny`, `/thienvu` (conference/QR landings,
+  `noindex`, standalone — no Nav/Footer), plus `/pre-call` and `/refund-policy`.
+
+**Why:** stronger, more concrete positioning and dedicated conversion surfaces for
+in-person/QR traffic. These are LIVE on `main` (an earlier SITE.md draft described
+them as "not yet live" — that was stale and has been corrected).
+
+## topic: leaderboard-trigger — _2026-06_
+
+The `/campaigns/leaderboard` snapshot is built by an Apps Script on its **own**
+time-driven trigger (06:30 daily), fully decoupled from the existing `syncActive()`
+digest — installed as a separate trigger, not added inside `syncActive()`.
+
+**Why:** a leaderboard failure must not be able to take down the daily Slack/Discord
+campaign digest. Independent triggers isolate the blast radius. Sideshift API keys
+stay in Apps Script; Vercel only knows the Web App URL + page password.
+
+## topic: canonical-domain — _2026-04_
+
+Made **non-www** (`vocreations.com`) the canonical/primary domain; `www` now
+308-redirects to it (previously reversed, with a 307). Added `middleware.ts` to
+enforce the redirect and strip tracking query params (`?wtime=`, `?trakyo_id=`)
+that created duplicate URLs. Added Squarespace legacy-URL redirects in
+`next.config.mjs`.
+
+**Why:** GSC flagged duplicate-without-canonical and 404 issues from the old
+Squarespace site. Full SEO history: [../SEO-WORK-DIARY.md](../SEO-WORK-DIARY.md).
+
+## topic: showcase-video — _(convention)_
+
+Inline showcase `<video>` blocks always use `src={`${v.src}#t=0.1`}` plus
+`playsInline muted loop preload="metadata"`, with `onMouseLeave` resetting
+`currentTime = 0.1`.
+
+**Why:** the `#t=0.1` media fragment forces iOS Safari to render the frame at 0.1s
+as a thumbnail instead of a black box — no separate poster image needed. Reference:
+`app/page.tsx`. Keep all raw `<video>` blocks identical.

@@ -1,0 +1,18 @@
+name: docs-check
+
+# Enforces the website docs standard. Runs on every push/PR, which is exactly
+# when a stale known-broken entry would re-activate, so expiry fires on return.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/docs-check.mjs
