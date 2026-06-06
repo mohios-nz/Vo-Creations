@@ -4,6 +4,8 @@ import type { NextRequest } from "next/server";
 /** Query params to strip: tracking/embed params that create duplicate URLs */
 const STRIP_PARAMS = ["wtime", "trakyo_id"];
 
+// DECISION 2026-04: non-www is canonical; www permanent-redirects here and tracking
+// params are stripped to kill duplicate URLs. See docs/DECISIONS.md (topic: canonical-domain).
 export function middleware(request: NextRequest) {
   const { hostname, pathname, searchParams } = request.nextUrl;
 
