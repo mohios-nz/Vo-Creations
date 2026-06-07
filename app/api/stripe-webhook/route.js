@@ -3,6 +3,9 @@
 // - Payment received (tracks count, cancels after 4) → Slack
 // - Payment failed → Slack
 //
+// DECISION 2026-06: Slack-only (no Sheets), no on-site checkout; sales via direct
+// Stripe links. See docs/DECISIONS.md (topic: payments).
+//
 // Env vars needed:
 //   STRIPE_SECRET_KEY
 //   STRIPE_WEBHOOK_SECRET

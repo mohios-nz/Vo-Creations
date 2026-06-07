@@ -40,6 +40,8 @@ const steps = [
   },
 ];
 
+// DECISION: showcase <video> uses the #t=0.1 thumbnail trick (and onMouseLeave resets
+// to 0.1) for iOS Safari. Keep all blocks identical. See docs/DECISIONS.md (topic: showcase-video).
 const showcaseVideos = [
   { src: "/videos/post-1.mp4", views: "3.8M", likes: "306K", engagement: "7.98%", postUrl: "https://www.instagram.com/p/DTFU5uGjgqV/" },
   { src: "/videos/post-2.mp4", views: "3.7M", likes: "189K", engagement: "5.10%", postUrl: "https://www.instagram.com/p/DTRCvh2E1Lu/" },

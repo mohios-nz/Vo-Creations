@@ -82,6 +82,19 @@ digest — installed as a separate trigger, not added inside `syncActive()`.
 campaign digest. Independent triggers isolate the blast radius. Sideshift API keys
 stay in Apps Script; Vercel only knows the Web App URL + page password.
 
+## topic: leaderboard — _2026-06_
+
+Removed the creator leaderboard entirely: deleted `app/campaigns/leaderboard/`, the
+basic-auth gate in `middleware.ts`, and the `LEADERBOARD_DATA_URL` /
+`LEADERBOARD_PASSWORD` env vars (also removed from Vercel). **Supersedes
+`topic: leaderboard-trigger`.**
+
+**Why:** the V1 implementation wasn't good enough and is being rebuilt from scratch.
+Removed now so the rebuild starts clean rather than extending dead code. The
+out-of-repo Apps Script reference copy (`apps-script/campaign-tracker-v2.gs`) is
+left in place because the same script still serves the daily campaign digest; its
+leaderboard functions are dormant until the rebuild decides what to reuse.
+
 ## topic: canonical-domain — _2026-04_
 
 Made **non-www** (`vocreations.com`) the canonical/primary domain; `www` now
@@ -115,3 +128,39 @@ sources are already duplicated under `public/`). Committing ~15MB of unreference
 binaries would bloat git history permanently. The UGC Trackr brief is for a
 separate project (`voc-trackr-internal` → `trackr.vocreations.com`) and, per the
 brief itself, should not live in the marketing repo.
+
+## topic: mercury-webhook — _2026-06_
+
+Added `app/api/mercury-webhook/route.js`: Mercury bank `transaction.created`
+events → Slack (#ka-ching, the same `SLACK_WEBHOOK_URL` as the Stripe webhook).
+Posts **incoming payments only** (`amount > 0`). Parses Mercury's Events API
+envelope (`resourceType` / `operationType` / `mergePatch`), NOT a `{type,data}`
+shape. New env var: `MERCURY_WEBHOOK_SECRET`.
+
+**Why:** the team wanted an "agency ka-ching" feed of incoming revenue alongside
+the mentorship Stripe alerts. Signature is HMAC-SHA256 over `"<ts>.<body>"`
+(`Mercury-Signature` header) with replay protection. Mercury has no test-event
+feature, so the handler logs the full payload and falls back to a raw message on
+an unexpected shape, to be refined from the first real event.
+
+## topic: deploy — _2026-06_
+
+Deploy by **merging to `main`**; Vercel's git integration builds and ships to
+production. Do not deploy prod-only changes via `vercel deploy --prod` from a
+branch and expect them to persist.
+
+**Why:** production always resets to `main` on the next git deploy. A CLI/branch
+deploy that was never merged silently reverted a live `/about` update when an
+unrelated PR merged (recovered by cherry-picking the orphaned commit). Supersedes
+the earlier "always deploy via CLI" practice.
+
+## topic: docs-standard — _2026-06_
+
+Adopted **website-build-rules v1**: `CLAUDE.md` router (with the embedded version
+marker), `docs/SITE.md` (present-tense wiring, points at `app/` + `.env.example`,
+does not enumerate routes/env), this file, and `scripts/docs-check.mjs` +
+`.github/workflows/docs-check.yml` (env-sync, dead-links, version-skew).
+
+**Why:** single source of truth for docs across website repos; the version-skew
+check replaces the previous hand-rolled "known-broken 30-day expiry" check.
+`build.yml` (runs `next build` on PRs) is kept separately, outside the standard.

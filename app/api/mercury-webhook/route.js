@@ -8,6 +8,9 @@
 // Transaction amount sign: positive = credit (money in), negative = debit.
 // We only notify on incoming payments (amount > 0); outgoing is ignored.
 //
+// DECISION 2026-06: incoming-only filter + Events API envelope parsing are
+// deliberate. See docs/DECISIONS.md (topic: mercury-webhook).
+//
 // Signature: header "Mercury-Signature: t=<ts>,v1=<sig>",
 //   HMAC-SHA256 over "<ts>.<rawBody>" keyed with the endpoint secret.
 //
