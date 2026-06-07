@@ -18,6 +18,7 @@ entry silently supersedes an older one on the same `topic:` key — recency deci
 
 ## Decisions index — consult DECISIONS.md before re-deciding any of these
 
+- `sideshift-api` — Creator Data Platform: API base `app.sideshift.app/api/v1`, `x-api-key` auth, lifetime totals → daily snapshot subtraction. Wiring in SITE.md.
 - `payments` — no website checkout; direct Stripe links + Slack-only webhook
 - `marketing-2026-06` — guarantee + mentorship reframe shipped (supersedes the old 3M / two-month framing)
 - `leaderboard-trigger` — runs on its own Apps Script trigger, decoupled from `syncActive()`
