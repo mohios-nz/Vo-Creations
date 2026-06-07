@@ -7,11 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "docs:check": "node scripts/docs-check.mjs"
+    "docs:check": "node scripts/docs-check.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "sideshift:probe": "node --env-file=.env.local scripts/probe-sideshift.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
+    "drizzle-orm": "^0.45.2",
     "next": "14.2.35",
+    "postgres": "^3.4.9",
     "react": "^18",
     "react-dom": "^18",
     "stripe": "^21.0.1"
@@ -20,6 +26,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "drizzle-kit": "^0.31.10",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

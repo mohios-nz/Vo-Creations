@@ -28,6 +28,10 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# Sideshift probe fixtures — real creator data (names, handles, view counts).
+# Local-only; Phase 1 seeds raw_ingest from these. Not committed (PII).
+/fixtures/sideshift/
+
 # vercel
 .vercel
 

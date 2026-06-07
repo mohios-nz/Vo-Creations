@@ -22,10 +22,11 @@ Next.js 14 (App Router), TypeScript, Tailwind CSS. Hosted on Vercel, git-connect
 - [README.md](README.md) — human onboarding + brand voice.
 
 ## Decisions index (consult DECISIONS.md before re-deciding any of these)
+- `sideshift-api` — Creator Data Platform: API base `app.sideshift.app/api/v1`, `x-api-key` auth, lifetime totals → daily snapshot subtraction. Wiring in SITE.md.
 - `payments` — no website checkout; direct Stripe links; webhook → Slack (#ka-ching)
 - `mercury-webhook` — Mercury bank events → Slack #ka-ching (incoming only)
 - `marketing-2026-06` — guarantee + mentorship reframe (supersedes the old 3M / two-month framing)
-- `leaderboard` — removed 2026-06, rebuilding from scratch; old Apps Script/middleware path scrapped
+- `leaderboard` — removed 2026-06, rebuilding from scratch on the data platform (old Apps Script/middleware path scrapped)
 - `canonical-domain` — non-www is canonical; www 308-redirects
 - `showcase-video` — `#t=0.1` media fragment for iOS Safari thumbnails
 - `content-assets` — `content/` binaries gitignored, live in Google Drive

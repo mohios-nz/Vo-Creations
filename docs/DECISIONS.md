@@ -10,6 +10,39 @@ edit the old entry. For present-tense "how it works now," see
 
 ---
 
+## topic: sideshift-api — _2026-06_
+
+Phase 0 probe (`scripts/probe-sideshift.mjs`) confirmed the real Sideshift API
+against a live key. The brief's assumed endpoints were close but the specifics
+matter, so they are pinned here:
+
+- **Base URL:** `https://app.sideshift.app/api/v1` (the public API; note the
+  `app.` host + `/api/v1` path. `app.sideshift.app/api/*` without `/v1` is the
+  web app's internal API and wants a Firebase token — not for us.)
+- **Auth:** header `x-api-key: <key>` (NOT `Authorization: Bearer`).
+- **Identity (brief confirmed):** the stable creator id is a Firebase uid, exposed
+  identically as `topCreators[].id`, `handles[].userId`, and `/creators[].id` —
+  this is the auto-link key (`creators.external_id`).
+- **Endpoints the adapter uses:**
+  - `GET /programs?status=active` — paginated `{data, page, total, totalPages}`.
+    Each program: `id, name, companyId, companyName, status, startsAt/endsAt`
+    (unix **seconds**), plus aggregate `stats` and a `handles[]` registry.
+  - `GET /creators?programId=X&limit=200` — paginated full roster (default page
+    size 25): `{id, name, email, phone, profileImageUrl, campaigns[]}`, where
+    `campaigns[].handles[]` are the per-program handles. → CRM + campaign_accounts.
+  - `GET /analytics/overview?programId=X&topCreatorsLimit=1000` — `data.topCreators[]`
+    = `{id, name, totalViews, totalPosts}`, the **per-creator lifetime totals** =
+    snapshot rows. Only creators with activity appear (verified: Σ topCreators
+    views == summary.totalViews exactly, so it's the complete metrics set).
+- **Date range:** `/analytics/overview` takes `topCreatorsLimit` (creator count),
+  not a date range. Date-range params return 200 but don't change the payload →
+  totals are **lifetime**; windows come from snapshot subtraction (as the brief
+  assumed). The `topCreatorsLimit` knob is the one simplification found.
+
+**Why pinned:** the adapter (`lib/ingest/sideshift.ts`) is the only place that
+talks to this API; everything else reads normalized data. If the API changes,
+this entry + that file are the two things to update.
+
 ## topic: payments — _2026-06_
 
 Removed the website checkout (`app/mentorship/enroll/` page and `app/api/checkout/`

@@ -34,3 +34,23 @@ webhooks post to Slack #ka-ching: Stripe (`app/api/stripe-webhook/route.js`) and
 Mercury (`app/api/mercury-webhook/route.js`). Detail:
 [stripe-slack-integration.md](stripe-slack-integration.md); rationale in
 [DECISIONS.md](DECISIONS.md) (`topic: payments`, `topic: mercury-webhook`).
+
+## Creator Data Platform
+
+Agency-owned creator-data warehouse + products that read it (Master Build Brief;
+the leaderboard is the first tenant). Read the code, not a copy here. _Why:
+[DECISIONS.md](DECISIONS.md) `topic: sideshift-api`._
+
+- **DB:** Supabase Postgres + Drizzle. Schema [`lib/db/schema.ts`](../lib/db/schema.ts);
+  migrations `lib/db/migrations/` (generated, never hand-edited). Runtime → pooled
+  `POSTGRES_URL` (`lib/db/client.ts`); migrations → direct `POSTGRES_URL_NON_POOLING`.
+- **Model:** immutable daily **snapshots** of lifetime view/post totals keyed at
+  (creator + program); every window is a snapshot subtraction. Creators auto-link
+  across campaigns via a stable Sideshift `userId` (`creators.external_id`).
+- **Ingest seam:** vendor-agnostic `IngestAdapter` ([`lib/ingest/types.ts`](../lib/ingest/types.ts));
+  [`lib/ingest/sideshift.ts`](../lib/ingest/sideshift.ts) is the only module touching the vendor.
+- **Pipeline:** [`lib/ingest/sync.ts`](../lib/ingest/sync.ts) — immutable `raw_ingest`,
+  upserts (agency CRM fields preserved), idempotent snapshots, `sync_runs` log, Slack
+  warn on failure or a lifetime-views decrease. One program failing doesn't fail the batch.
+- **Cron:** `app/api/cron/sync` daily 09:00 UTC (`vercel.json`), Bearer `CRON_SECRET`.
+- **Probe:** `scripts/probe-sideshift.mjs` (Phase 0 discovery; fixtures gitignored, PII).
