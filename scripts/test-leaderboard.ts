@@ -18,6 +18,7 @@ import { test, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import postgres from "postgres";
 import { getCampaignLeaderboard, getOverallLeaderboard } from "@/lib/queries/leaderboard";
+import { closeDb } from "@/lib/db/client";
 
 const SRC = "test_lb";
 const sql = postgres(process.env.POSTGRES_URL!, { prepare: false });
@@ -57,7 +58,11 @@ const line = (b: { entries: { name: string; views: number; rank: number }[] }) =
 // Per-test clean slate: overall-board tests span EVERY program, so leftover synthetic
 // data from an earlier test would pollute them. wipe before each, and once at the end.
 beforeEach(wipe);
-after(async () => { await wipe(); await sql.end(); });
+after(async () => {
+  await wipe();
+  await sql.end();      // close the test's own seeding connection
+  await closeDb();      // AND the leaderboard module's connection, else the process never exits
+});
 
 test("campaign 7d/30d/all-time: deltas, tie ranks, latest-not-max, mid-window fallback", async () => {
   const p = await newProgram("p1");
