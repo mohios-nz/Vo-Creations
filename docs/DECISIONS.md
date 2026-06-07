@@ -43,6 +43,41 @@ matter, so they are pinned here:
 talks to this API; everything else reads normalized data. If the API changes,
 this entry + that file are the two things to update.
 
+## topic: leaderboard-windows — _2026-06_
+
+How the leaderboard derives its numbers. Verified against the live API + fixtures
+(program `WDeIefXYKcb5SIeMLhst`), not assumed. Refines `topic: sideshift-api`.
+
+- **Join key LOCKED:** `topCreators[].id` == `handles[].userId` (live-tested 10/10).
+  Metrics (`totalViews/totalPosts`) come from `topCreators[]` keyed by `id`; identity
+  (name/platform/handle/image) from `handles[]` keyed by `userId`. The board **ignores
+  `creators.approved`** entirely — that field tracks approved contracts
+  (== `summary.activeContracts`), not the metric/identity grain. Only ~5/10 top
+  creators are "approved"; the rest are repurposed accounts (below), which is expected.
+- **Full metric set:** the knob is `topCreatorsLimit` (not `limit`/`topN`, which are
+  ignored). `=1000` returns all `summary.uniqueCreators`. The adapter throws if it gets
+  fewer than `uniqueCreators`, so silent truncation can't slip through.
+- **All-time freeze (the key decision):** accounts get **repurposed** across campaigns
+  — old content deleted, the warm account (followers) kept — so a per-(creator,
+  campaign) *lifetime* total can DECREASE after a campaign ends. This contaminates
+  **all-time** boards only; **7d/30d are clean** (active campaigns; accounts aren't
+  repurposed that soon). Fix, no schema change: we only sync `status=active` programs,
+  so snapshots stop at campaign end → the last `snapshots` row per (program, creator)
+  is the clean campaign-final value, captured before erosion. **All-time is built from
+  our own snapshots** — `MAX(lifetime_views)` per (program, creator), summed across a
+  creator's programs by stable `external_id` — NOT the live `/analytics/overview`
+  all-time (contaminated). The `sync_runs` "views decreased" warning is the erosion signal.
+- **Orphan creators → UPSERT (decided):** a `topCreators` metric can reference a creator
+  absent from the current `/creators` roster (the repurposed ones). The pipeline
+  upserts the creator from the metric's `id`+`name` (already implemented in
+  `lib/ingest/sync.ts`) rather than skipping, so all-time credit is preserved across
+  campaigns. Trade-off: the board is metric-scoped, not strictly roster-scoped — correct
+  here because all-time deliberately spans past campaigns.
+
+**Why:** these four are the difference between a correct board and a plausible-but-wrong
+one. The all-time-from-snapshots rule in particular must live in `lib/queries/leaderboard.ts`
+and nowhere else.
+
 ## topic: payments — _2026-06_
 
 Removed the website checkout (`app/mentorship/enroll/` page and `app/api/checkout/`

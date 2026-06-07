@@ -52,5 +52,9 @@ the leaderboard is the first tenant). Read the code, not a copy here. _Why:
 - **Pipeline:** [`lib/ingest/sync.ts`](../lib/ingest/sync.ts) — immutable `raw_ingest`,
   upserts (agency CRM fields preserved), idempotent snapshots, `sync_runs` log, Slack
   warn on failure or a lifetime-views decrease. One program failing doesn't fail the batch.
+- **Metrics (one definition):** [`lib/queries/leaderboard.ts`](../lib/queries/leaderboard.ts)
+  — per-campaign + overall boards × {7d, 30d, all-time}. 7d/30d are snapshot deltas;
+  all-time is `MAX(lifetime_views)` per (program, creator) from our snapshots (see
+  DECISIONS `topic: leaderboard-windows`). Returns a `warmingUp` state, never a fake zero.
 - **Cron:** `app/api/cron/sync` daily 09:00 UTC (`vercel.json`), Bearer `CRON_SECRET`.
 - **Probe:** `scripts/probe-sideshift.mjs` (Phase 0 discovery; fixtures gitignored, PII).
