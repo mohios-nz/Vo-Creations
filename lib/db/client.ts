@@ -17,6 +17,7 @@ import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
+let queryClient: ReturnType<typeof postgres> | null = null;
 let instance: PostgresJsDatabase<typeof schema> | null = null;
 
 function init(): PostgresJsDatabase<typeof schema> {
@@ -28,7 +29,7 @@ function init(): PostgresJsDatabase<typeof schema> {
   }
   // `prepare: false` is required by Supabase's transaction-mode pooler (pgbouncer),
   // which does not support prepared statements.
-  const queryClient = postgres(connectionString, { prepare: false });
+  queryClient = postgres(connectionString, { prepare: false });
   return drizzle(queryClient, { schema });
 }
 
@@ -36,6 +37,16 @@ function init(): PostgresJsDatabase<typeof schema> {
 export function getDb(): PostgresJsDatabase<typeof schema> {
   if (!instance) instance = init();
   return instance;
+}
+
+/** Close the pooled connection. For test teardown / scripts only — serverless
+ *  never calls this (the lambda is frozen between invocations, not torn down).
+ *  Without it, a one-off process (like the leaderboard test) leaks an open handle
+ *  and never exits. */
+export async function closeDb(): Promise<void> {
+  await queryClient?.end({ timeout: 5 });
+  queryClient = null;
+  instance = null;
 }
 
 // Convenience handle: `db.insert(...)` works as before, but the underlying

@@ -1,0 +1,38 @@
+name: leaderboard-test
+
+# Proves the leaderboard window math (lib/queries/leaderboard.ts) against a real
+# Postgres, so a future edit can't silently break 7d/30d deltas, all-time, ranking,
+# or warm-up with CI still green. Runs the committed node:test suite, which calls the
+# REAL exported query functions (not a copy of the SQL). Data trust is the product.
+on: [push, pull_request]
+
+jobs:
+  leaderboard-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Throwaway DB — empty, so the overall-board tests run for real (no foreign data).
+      POSTGRES_URL: postgres://postgres:postgres@localhost:5432/postgres
+      POSTGRES_URL_NON_POOLING: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Apply schema
+        run: npm run db:migrate
+      - name: Run leaderboard window-math tests
+        run: npm run test:leaderboard:ci

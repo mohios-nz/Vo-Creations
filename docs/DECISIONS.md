@@ -43,6 +43,52 @@ matter, so they are pinned here:
 talks to this API; everything else reads normalized data. If the API changes,
 this entry + that file are the two things to update.
 
+## topic: leaderboard-windows — _2026-06_
+
+How the leaderboard derives its numbers. Verified against the live API + fixtures
+(program `WDeIefXYKcb5SIeMLhst`), not assumed. Refines `topic: sideshift-api`.
+
+- **Population — rank only creators who POSTED (vendor-confirmed, Daniel 2026-06):**
+  the ranked set is exactly `topCreators[]` (== `summary.uniqueCreators`). NO filtering
+  by `creators.approved` (that tracks approved contracts, == `summary.activeContracts`,
+  not the metric grain) and NO roster-membership filter. Identity joins from `handles[]`
+  by `userId`; metrics from `topCreators[]` by `id` (join key LOCKED, live-tested 10/10).
+- **Full metric set:** the knob is `topCreatorsLimit` (not `limit`/`topN`, which are
+  ignored). `=1000` returns all `summary.uniqueCreators`. The adapter throws if it gets
+  fewer than `uniqueCreators`, so silent truncation can't slip through.
+- **All-time = LIVE lifetime totals (vendor will fix repurposing, Daniel 2026-06):**
+  accounts get **repurposed** across campaigns — old content deleted, warm account kept —
+  so a per-(creator, campaign) *lifetime* total can DECREASE after a campaign ends,
+  contaminating **all-time** boards (7d/30d are clean — active campaigns, no repurposing
+  that soon). The vendor confirmed they will fix the carried-over stats on their end
+  (timeline unknown). **Decision: do NOT build the all-time-freeze workaround.** All-time
+  uses the **latest** `lifetime_views` per (creator, program), summed across a creator's
+  programs by stable `external_id` (full history, live values). **TODO (remove when
+  vendor ships the fix):** if contamination proves material before then, build a freeze
+  fallback (`MAX(lifetime_views)` per program+creator) — our `snapshots` are immutable,
+  so the historical data for it is already preserved with zero loss.
+- **Orphan creators → UPSERT (decided):** a `topCreators` metric can reference a creator
+  absent from the current `/creators` roster (a repurposed one). The pipeline upserts the
+  creator from the metric's `id`+`name` (already in `lib/ingest/sync.ts`) rather than
+  skipping, so the posted-content population above is fully ranked. The `sync_runs`
+  "views decreased" warning remains the erosion signal.
+
+- **Window qualification is PER-PROGRAM (recorded choice):** a program contributes to an
+  N-day window only if it individually has ≥ N days of snapshot history; warm-up + `asOf`
+  + `daysOfHistory` derive from that same qualifying set, never a global min/max. Known
+  gap: a creator active across two *disjoint young* campaigns (each < N days) sees the
+  overall N-day board as warming up rather than stitched across campaigns — accepted.
+- **Deltas floored at 0:** a 7d/30d window decrease never shows on the board
+  (`greatest(delta, 0)`). The erosion signal is `sync_runs.warnings` (views_decreased),
+  not the board. Tie ranking is **views-only** (equal views share a rank; `posts`/`name`
+  set display order only). Delta baseline is the snapshot **at/before** `latest − N`
+  (≤ ~1 day bias with daily snapshots) — accepted, no change.
+
+**Why:** these are the difference between a correct board and a plausible-but-wrong one.
+All of it lives ONLY in `lib/queries/leaderboard.ts`, proven by a committed, re-runnable
+test (`scripts/test-leaderboard.ts`, CI job `leaderboard-test`). _Supersedes the earlier
+all-time-freeze plan, dropped after the vendor confirmed an upstream fix._
+
 ## topic: payments — _2026-06_
 
 Removed the website checkout (`app/mentorship/enroll/` page and `app/api/checkout/`
