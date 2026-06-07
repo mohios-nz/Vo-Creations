@@ -63,19 +63,35 @@ function progFilter(programId: string | null) {
   return programId ? sql`program_id = ${programId}` : sql`true`;
 }
 
-/** History envelope (max/min snapshot date, span) for the in-scope programs. */
-async function historyEnvelope(programId: string | null): Promise<{ asOf: string | null; days: number }> {
-  const rows = await db.execute<{ as_of: string | null; days: number | null }>(sql`
-    select max(snapshot_date)::text as as_of,
-           coalesce(max(snapshot_date) - min(snapshot_date), 0) as days
-    from snapshots
-    where ${progFilter(programId)}
+/**
+ * PER-PROGRAM history envelope (latest snapshot date + span in days) for the
+ * in-scope programs. Warm-up and asOf/daysOfHistory are derived from THIS per-program
+ * set — never a global min/max across programs. Otherwise two disjoint young programs
+ * (each < N days, but far apart on the calendar) would report a long global span and
+ * a non-warming board with zero entries (deltaBoard qualifies per-program, so neither
+ * contributes). See DECISIONS topic: leaderboard-windows.
+ */
+async function programEnvelopes(programId: string | null): Promise<{ latest: string; span: number }[]> {
+  const rows = await db.execute<{ latest: string; span: number | null }>(sql`
+    select max(snapshot_date)::text as latest,
+           (max(snapshot_date) - min(snapshot_date)) as span
+    from snapshots where ${progFilter(programId)}
+    group by program_id
   `);
-  const r = rows[0];
-  return { asOf: r?.as_of ?? null, days: Number(r?.days ?? 0) };
+  return rows.map((r) => ({ latest: r.latest, span: Number(r.span ?? 0) }));
 }
 
-/** 7d / 30d: per-(program,creator) delta, summed per creator across in-scope programs. */
+const maxDate = (envs: { latest: string }[]): string | null =>
+  envs.length ? envs.map((e) => e.latest).sort()[envs.length - 1] : null; // ISO dates sort chronologically
+const maxSpan = (envs: { span: number }[]): number =>
+  envs.reduce((m, e) => Math.max(m, e.span), 0);
+
+/** 7d / 30d: per-(program,creator) delta, summed per creator across in-scope programs.
+ *  PRODUCT CALLS (accepted, docs/DECISIONS leaderboard-windows):
+ *   - Baseline is the snapshot AT/BEFORE `latest - N` (not interpolated to exactly N
+ *     days ago). With daily snapshots this is at most ~1 day of bias; accepted, no change.
+ *   - Deltas are floored at 0 (`greatest(..., 0)`): a window decrease never shows on the
+ *     board. The erosion signal lives in `sync_runs.warnings` (views_decreased), not here. */
 async function deltaBoard(programId: string | null, days: number): Promise<RawRow[]> {
   const rows = await db.execute<RawRow>(sql`
     with ref as (
@@ -163,7 +179,10 @@ async function profileImageMap(): Promise<Map<string, string>> {
   return map;
 }
 
-/** Attach avatars and competition-style ranks (ties share a rank: 1,2,2,4). */
+/** Attach avatars and competition-style ranks (ties share a rank: 1,2,2,4).
+ *  PRODUCT CALL: ties are broken by VIEWS ONLY — equal views share a rank. The
+ *  `posts desc, name asc` in the SQL ORDER BY only sets a stable DISPLAY order among
+ *  tied rows; it does NOT split their rank. (Decided, docs/DECISIONS leaderboard-windows.) */
 function toEntries(rows: RawRow[], images: Map<string, string>): LeaderboardEntry[] {
   const entries: LeaderboardEntry[] = [];
   let lastViews: number | null = null;
@@ -191,19 +210,38 @@ async function buildBoard(
   programId: string | null,
   window: LeaderboardWindow
 ): Promise<Leaderboard> {
-  const { asOf, days } = await historyEnvelope(programId);
+  const envs = await programEnvelopes(programId);
 
-  // Warm-up only applies to the rolling windows; all-time works from day one.
-  if (window !== "all-time" && days < WINDOW_DAYS[window]) {
-    return { scope, window, programId, warmingUp: true, asOf, daysOfHistory: days, entries: [] };
+  if (window !== "all-time") {
+    // A program contributes to an N-day window only if IT has >= N days of history
+    // (the same rule deltaBoard's `qualifying` CTE applies). Warm-up + asOf +
+    // daysOfHistory are derived from this SAME set, so they can never disagree with
+    // what actually contributed (the disjoint-young-programs bug).
+    const need = WINDOW_DAYS[window];
+    const qualifying = envs.filter((e) => e.span >= need);
+    if (qualifying.length === 0) {
+      // Nothing has enough history yet — honest warm-up. daysOfHistory reports the
+      // best any single program has, so callers can say "best is X days, need N".
+      return {
+        scope, window, programId, warmingUp: true,
+        asOf: maxDate(envs), daysOfHistory: maxSpan(envs), entries: [],
+      };
+    }
+    const [rows, images] = await Promise.all([deltaBoard(programId, need), profileImageMap()]);
+    return {
+      scope, window, programId, warmingUp: false,
+      asOf: maxDate(qualifying), daysOfHistory: maxSpan(qualifying),
+      entries: toEntries(rows, images),
+    };
   }
 
-  const [rows, images] = await Promise.all([
-    window === "all-time" ? allTimeBoard(programId) : deltaBoard(programId, WINDOW_DAYS[window]),
-    profileImageMap(),
-  ]);
-
-  return { scope, window, programId, warmingUp: false, asOf, daysOfHistory: days, entries: toEntries(rows, images) };
+  // all-time: never warming up; describe all in-scope programs that have data.
+  const [rows, images] = await Promise.all([allTimeBoard(programId), profileImageMap()]);
+  return {
+    scope, window, programId, warmingUp: false,
+    asOf: maxDate(envs), daysOfHistory: maxSpan(envs),
+    entries: toEntries(rows, images),
+  };
 }
 
 /** Per-campaign board for one program (by internal programs.id). */

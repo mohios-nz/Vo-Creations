@@ -73,8 +73,20 @@ How the leaderboard derives its numbers. Verified against the live API + fixture
   skipping, so the posted-content population above is fully ranked. The `sync_runs`
   "views decreased" warning remains the erosion signal.
 
+- **Window qualification is PER-PROGRAM (recorded choice):** a program contributes to an
+  N-day window only if it individually has ≥ N days of snapshot history; warm-up + `asOf`
+  + `daysOfHistory` derive from that same qualifying set, never a global min/max. Known
+  gap: a creator active across two *disjoint young* campaigns (each < N days) sees the
+  overall N-day board as warming up rather than stitched across campaigns — accepted.
+- **Deltas floored at 0:** a 7d/30d window decrease never shows on the board
+  (`greatest(delta, 0)`). The erosion signal is `sync_runs.warnings` (views_decreased),
+  not the board. Tie ranking is **views-only** (equal views share a rank; `posts`/`name`
+  set display order only). Delta baseline is the snapshot **at/before** `latest − N`
+  (≤ ~1 day bias with daily snapshots) — accepted, no change.
+
 **Why:** these are the difference between a correct board and a plausible-but-wrong one.
-All of it lives ONLY in `lib/queries/leaderboard.ts`. _Supersedes the earlier
+All of it lives ONLY in `lib/queries/leaderboard.ts`, proven by a committed, re-runnable
+test (`scripts/test-leaderboard.ts`, CI job `leaderboard-test`). _Supersedes the earlier
 all-time-freeze plan, dropped after the vendor confirmed an upstream fix._
 
 ## topic: payments — _2026-06_
