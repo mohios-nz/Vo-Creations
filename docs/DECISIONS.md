@@ -127,9 +127,12 @@ The leaderboard (`/leaderboard`, → `leaderboard.vocreations.com`) launched wit
 - **Host rewrite for the subdomain:** `leaderboard.vocreations.com` rewrites any
   non-`/leaderboard`, non-`/auth` path to `/leaderboard` (in `middleware.ts`) — without
   it the subdomain root serves the marketing homepage. Uses the same
-  `request.nextUrl.hostname` pattern as the www-redirect, so (like that redirect) it is
-  **only testable in production** — `next dev` ignores a spoofed Host header. Validate at
-  the DNS cutover (assign the domain in Vercel, then load the bare subdomain).
+  `request.nextUrl.hostname` pattern as the www-redirect (only exercisable in production;
+  `next dev` ignores a spoofed Host header). **VERIFIED in prod 2026-06-08** (commit
+  `58b2f21`, DNS = CNAME → vercel-dns): `/` → 307 `/leaderboard/login`; `/about` → 307
+  `/leaderboard/login` (rewritten, not the marketing page); `/auth/callback` → 307
+  `/leaderboard/login?error=link` (the `?error=link` proves the callback route ran, i.e.
+  `/auth` is NOT rewritten); apex `vocreations.com/` still 200 (marketing intact).
 - **Staff access = Google OAuth + allow-list (decided):** agency staff sign in with Google
   (Supabase Google provider) and get the FULL dashboard — overall + ALL campaign boards,
   switcher unscoped, "staff view" badge, no YOU (staff aren't ranked). Allow-list is
