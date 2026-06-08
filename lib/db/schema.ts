@@ -25,6 +25,7 @@ export const creators = pgTable("creators", {
   portfolioUrl: text("portfolio_url"),
   bio: text("bio"),                       // "a little about the person"
   email: text("email"),
+  altEmail: text("alt_email"),            // secondary login email (login-eligible — see DECISIONS leaderboard-access)
   notes: text("notes"),                   // free-form agency notes
   status: text("status").notNull().default("active"), // active | inactive
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

@@ -58,3 +58,9 @@ the leaderboard is the first tenant). Read the code, not a copy here. _Why:
   DECISIONS `topic: leaderboard-windows`). Returns a `warmingUp` state, never a fake zero.
 - **Cron:** `app/api/cron/sync` daily 09:00 UTC (`vercel.json`), Bearer `CRON_SECRET`.
 - **Probe:** `scripts/probe-sideshift.mjs` (Phase 0 discovery; fixtures gitignored, PII).
+- **Leaderboard (`app/leaderboard/`):** gated creator board (→ `leaderboard.vocreations.com`).
+  Supabase **magic-link** auth (`lib/supabase/*`, session refresh in `middleware.ts`);
+  `session.email → creator` via `lib/queries/creator-access.ts`; reads the Phase 2 query
+  layer. Shows overall + the creator's own campaigns; directed unknown-email screen;
+  `noindex`. Re-skinned from `design/leaderboard-fun-prototype.html`. Email seeding:
+  `scripts/seed-creator-emails.mjs`. Why: DECISIONS `topic: leaderboard-access`.

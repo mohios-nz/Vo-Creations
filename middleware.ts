@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 /** Query params to strip: tracking/embed params that create duplicate URLs */
 const STRIP_PARAMS = ["wtime", "trakyo_id"];
 
 // DECISION 2026-04: non-www is canonical; www permanent-redirects here and tracking
 // params are stripped to kill duplicate URLs. See docs/DECISIONS.md (topic: canonical-domain).
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { hostname, pathname, searchParams } = request.nextUrl;
 
   // 1. Redirect www → non-www
@@ -36,6 +37,12 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.search = cleanParams.toString() ? `?${cleanParams.toString()}` : "";
     return NextResponse.redirect(url, 301);
+  }
+
+  // 3. Refresh the Supabase auth session for the gated leaderboard area only, so
+  //    marketing pages pay no auth overhead. See docs/DECISIONS topic: leaderboard-access.
+  if (pathname.startsWith("/leaderboard") || pathname.startsWith("/auth")) {
+    return updateSession(request);
   }
 
   return NextResponse.next();

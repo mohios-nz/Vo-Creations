@@ -24,6 +24,7 @@ Next.js 14 (App Router), TypeScript, Tailwind CSS. Hosted on Vercel, git-connect
 ## Decisions index (consult DECISIONS.md before re-deciding any of these)
 - `sideshift-api` — Creator Data Platform: API base `app.sideshift.app/api/v1`, `x-api-key` auth, lifetime totals → daily snapshot subtraction. Wiring in SITE.md.
 - `leaderboard-windows` — rank only creators who posted (`topCreators`); 7d/30d = snapshot deltas; all-time = live latest lifetime (vendor fixing repurposing; freeze fallback documented as TODO). Orphan creators upserted.
+- `leaderboard-access` — `/leaderboard` gated by Supabase magic-link auth (per-creator); email→creator; overall + own campaigns; directed unknown-email screen; noindex. Supersedes shared-password plan.
 - `payments` — no website checkout; direct Stripe links; webhook → Slack (#ka-ching)
 - `mercury-webhook` — Mercury bank events → Slack #ka-ching (incoming only)
 - `marketing-2026-06` — guarantee + mentorship reframe (supersedes the old 3M / two-month framing)
