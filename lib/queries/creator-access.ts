@@ -19,13 +19,16 @@ export interface CreatorProgram {
   companyName: string | null;
 }
 
-/** Resolve a logged-in email to a creator (case-insensitive, active only).
- *  null → "unknown email" (show the directed fallback screen, no data). */
+/** Resolve a logged-in email to a creator — matches the primary OR the alt email
+ *  (case-insensitive, input trimmed). Active only. Alt emails are login-eligible
+ *  (DECISIONS topic: leaderboard-access). null → "unknown email" (directed screen). */
 export async function getCreatorByEmail(email: string): Promise<CreatorIdentity | null> {
+  const e = email.trim().toLowerCase();
   const rows = await db.execute<{ id: string; external_id: string; name: string; email: string | null }>(sql`
     select id, external_id, name, email
     from creators
-    where lower(email) = lower(${email}) and status = 'active'
+    where status = 'active'
+      and (lower(trim(email)) = ${e} or lower(trim(alt_email)) = ${e})
     order by updated_at desc
     limit 1
   `);

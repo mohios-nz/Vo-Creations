@@ -5,10 +5,18 @@ import { createClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Only allow same-origin LOCAL paths as the post-login destination. Reject
+// protocol-relative ("//evil"), backslash ("/\\evil"), and absolute URLs
+// ("https://…", "@evil") — otherwise `${origin}${next}` is an open redirect.
+function safeNext(raw: string | null): string {
+  const n = raw ?? "/leaderboard";
+  return n.startsWith("/") && !n.startsWith("//") && !n.startsWith("/\\") ? n : "/leaderboard";
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/leaderboard";
+  const next = safeNext(searchParams.get("next"));
 
   if (code) {
     const supabase = createClient();

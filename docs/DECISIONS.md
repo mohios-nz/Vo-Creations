@@ -103,7 +103,17 @@ The leaderboard (`/leaderboard`, → `leaderboard.vocreations.com`) launched wit
   table is the authz source).
 - **Access model:** a recognized creator sees the **overall** board + only the
   campaigns they're on (`program_creators`); the switcher lists only their campaigns;
-  an unknown/unauthorized campaign param silently falls back to overall.
+  an unknown/unauthorized campaign param silently falls back to overall (enforced
+  server-side in `page.tsx` against `getCreatorPrograms(creator.id)`, not the UI).
+- **Overall-board cross-creator visibility is INTENDED (decided):** the overall board
+  shows every creator's name + aggregate views across all campaigns to any recognized
+  creator. This is by design (a shared agency board), not a leak — recorded so it's a
+  conscious choice.
+- **Alt emails are login-eligible (decided):** `creators.alt_email` (nullable, additive
+  migration `0001`). `getCreatorByEmail` matches `email` OR `alt_email` (case-insensitive,
+  input trimmed). The seed maps `email_primary → email`, `email_alt → alt_email`.
+- **Open-redirect guard:** `/auth/callback` accepts only same-origin LOCAL `next` paths
+  (must start with `/`, not `//` or `/\`); anything else falls back to `/leaderboard`.
 - **Unknown email → directed screen (not a dead end):** "We don't recognize this email
   yet — DM Danny on Slack with the email you want to use." No data shown.
 - **Seeding:** `scripts/seed-creator-emails.mjs` loads `creators.email` from a CSV

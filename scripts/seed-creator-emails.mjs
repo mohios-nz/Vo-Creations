@@ -1,27 +1,23 @@
 #!/usr/bin/env node
-// Seed creators.email from a CSV so creators can log in (Phase 3 magic-link auth).
+// Seed creator login emails from the consolidated agency CSV (Phase 3 magic-link auth).
 //
-//   node --env-file=.env.local scripts/seed-creator-emails.mjs <file.csv> [--apply]
+//   node --env-file=.env.local scripts/seed-creator-emails.mjs [file.csv] [--apply]
+//   (default file: active-creators-consolidated.csv — KEEP IT GITIGNORED, never commit)
 //
-// CSV needs a header row with `email` plus ONE identifier column (first match wins):
-//   external_id (Sideshift userId)  |  handle  |  name
-// Examples:
-//   email,external_id
-//   email,handle
-//   email,name
+// CSV columns:
+//   email_primary  → creators.email       (falls back to a plain `email` column)
+//   email_alt      → creators.alt_email    (login-eligible — DECISIONS leaderboard-access)
+// plus ONE identifier (first match wins): external_id (Sideshift userId) | handle | name
 //
 // Dry-run by default (prints what WOULD change + anything unmatched/ambiguous).
-// Pass --apply to write. Matching is case-insensitive; handle ignores a leading "@".
+// Pass --apply to write. Case-insensitive; values trimmed; handle ignores a leading "@".
 
 import { readFile } from "node:fs/promises";
 import postgres from "postgres";
 
-const [file, ...flags] = process.argv.slice(2);
-const APPLY = flags.includes("--apply");
-if (!file) {
-  console.error("usage: node --env-file=.env.local scripts/seed-creator-emails.mjs <file.csv> [--apply]");
-  process.exit(1);
-}
+const args = process.argv.slice(2);
+const APPLY = args.includes("--apply");
+const file = args.find((a) => !a.startsWith("--")) || "active-creators-consolidated.csv";
 
 function parseCsv(text) {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
@@ -32,21 +28,24 @@ function parseCsv(text) {
   });
 }
 
+const norm = (v) => (v || "").trim();
+const lc = (v) => norm(v).toLowerCase();
 const sql = postgres(process.env.POSTGRES_URL || process.env.DATABASE_URL, { prepare: false });
 
 async function findCreator(row) {
+  const sel = (where) => sql`select id, name, email, alt_email from creators where ${where}`;
   if (row.external_id) {
-    const r = await sql`select id, name, email from creators where external_id = ${row.external_id}`;
+    const r = await sel(sql`external_id = ${row.external_id}`);
     return r.length === 1 ? { creator: r[0], by: "external_id" } : { ambiguous: r.length > 1, by: "external_id" };
   }
   if (row.handle) {
     const h = row.handle.replace(/^@/, "");
-    const r = await sql`select distinct c.id, c.name, c.email from campaign_accounts a
+    const r = await sql`select distinct c.id, c.name, c.email, c.alt_email from campaign_accounts a
       join creators c on c.id = a.creator_id where lower(a.handle) = lower(${h})`;
     return r.length === 1 ? { creator: r[0], by: "handle" } : { ambiguous: r.length > 1, by: "handle" };
   }
   if (row.name) {
-    const r = await sql`select id, name, email from creators where lower(name) = lower(${row.name})`;
+    const r = await sel(sql`lower(name) = lower(${row.name})`);
     return r.length === 1 ? { creator: r[0], by: "name" } : { ambiguous: r.length > 1, by: "name" };
   }
   return { creator: null, by: "none" };
@@ -58,19 +57,23 @@ console.log(`\n  ${rows.length} rows from ${file} · mode: ${APPLY ? "APPLY" : "
 let updated = 0;
 const unmatched = [];
 for (const row of rows) {
-  if (!row.email) { unmatched.push({ row, reason: "no email column/value" }); continue; }
+  const email = norm(row.email_primary || row.email);
+  const altEmail = norm(row.email_alt) || null;
+  if (!email && !altEmail) { unmatched.push({ row, reason: "no email_primary/email_alt value" }); continue; }
+
   const { creator, ambiguous, by } = await findCreator(row);
   if (!creator) {
     unmatched.push({ row, reason: ambiguous ? `ambiguous by ${by}` : `no match by ${by}` });
     continue;
   }
-  const same = (creator.email || "").toLowerCase() === row.email.toLowerCase();
-  console.log(`  ${same ? "=" : "→"} ${creator.name.padEnd(24)} ${creator.email || "(none)"} ${same ? "" : "⇒ " + row.email}  [${by}]`);
-  if (!same && APPLY) {
-    await sql`update creators set email = ${row.email}, updated_at = now() where id = ${creator.id}`;
+
+  const same = lc(creator.email) === lc(email) && lc(creator.alt_email) === lc(altEmail);
+  console.log(`  ${same ? "=" : "→"} ${creator.name.padEnd(24)} ${creator.email || "(none)"}/${creator.alt_email || "(none)"} ${same ? "" : `⇒ ${email || "(none)"}/${altEmail || "(none)"}`}  [${by}]`);
+  if (!same) {
+    if (APPLY) {
+      await sql`update creators set email = ${email || null}, alt_email = ${altEmail}, updated_at = now() where id = ${creator.id}`;
+    }
     updated++;
-  } else if (!same) {
-    updated++; // would update
   }
 }
 

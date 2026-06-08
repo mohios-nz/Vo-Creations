@@ -32,6 +32,11 @@ yarn-error.log*
 # Local-only; Phase 1 seeds raw_ingest from these. Not committed (PII).
 /fixtures/sideshift/
 
+# Creator email/contact CSVs (PII) — seed source for scripts/seed-creator-emails.mjs.
+# Local-only, never committed.
+*.csv
+active-creators-consolidated.csv
+
 # vercel
 .vercel
 
