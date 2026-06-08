@@ -36,6 +36,21 @@ export async function getCreatorByEmail(email: string): Promise<CreatorIdentity 
   return r ? { id: r.id, externalId: r.external_id, name: r.name, email: r.email } : null;
 }
 
+/** Staff bypass: Google-authed agency staff see the FULL dashboard (all campaigns,
+ *  unscoped), not a creator's scoped view, and are not ranked. Allow-list via
+ *  STAFF_EMAILS (comma-separated emails) OR STAFF_EMAIL_DOMAINS (comma-separated
+ *  domains; defaults to the agency domains). Pure env check — no DB.
+ *  (DECISIONS topic: leaderboard-access.) */
+export function isStaffEmail(email: string): boolean {
+  const e = email.trim().toLowerCase();
+  const at = e.lastIndexOf("@");
+  if (at < 0) return false;
+  const list = (v: string | undefined, fallback = "") =>
+    (v ?? fallback).split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (list(process.env.STAFF_EMAILS).includes(e)) return true;
+  return list(process.env.STAFF_EMAIL_DOMAINS, "mohios.com,vocreations.com").includes(e.slice(at + 1));
+}
+
 /** The campaigns this creator is on (program_creators). Powers the switcher and
  *  is the authorization list for per-campaign boards. Only programs with snapshot
  *  data appear, so a creator never lands on an empty campaign board. */

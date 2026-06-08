@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCreatorByEmail, getCreatorPrograms, getCreatorHandles } from "@/lib/queries/creator-access";
 import {
-  getOverallLeaderboard, getCampaignLeaderboard,
+  getCreatorByEmail, getCreatorPrograms, getCreatorHandles, isStaffEmail,
+} from "@/lib/queries/creator-access";
+import {
+  getOverallLeaderboard, getCampaignLeaderboard, getLeaderboardPrograms,
   type Leaderboard, type LeaderboardWindow, type LeaderboardEntry,
 } from "@/lib/queries/leaderboard";
 import { avatarGradient, initials, PLATFORM_ICON } from "./avatar";
@@ -23,13 +25,24 @@ export default async function LeaderboardPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) redirect("/leaderboard/login");
 
-  const creator = await getCreatorByEmail(user.email);
-  if (!creator) return <UnknownEmail email={user.email} />;
+  // STAFF (Google-authed, allow-listed) get the full dashboard: ALL campaigns,
+  // unscoped switcher, not ranked. Everyone else resolves to a creator; unknown
+  // non-staff emails get the directed screen.
+  const staff = isStaffEmail(user.email);
+  let programs: { id: string; externalId: string; name: string }[];
+  let youId = ""; // "" → no row ever matches → no YOU highlight (staff aren't ranked)
+  if (staff) {
+    programs = (await getLeaderboardPrograms()).map((p) => ({ id: p.id, externalId: p.externalId, name: p.name }));
+  } else {
+    const creator = await getCreatorByEmail(user.email);
+    if (!creator) return <UnknownEmail email={user.email} />;
+    programs = (await getCreatorPrograms(creator.id)).map((p) => ({ id: p.id, externalId: p.externalId, name: p.name }));
+    youId = creator.id;
+  }
 
-  const programs = await getCreatorPrograms(creator.id);
-
-  // Resolve scope from the URL. An unknown / unauthorized campaign silently falls
-  // back to the overall board (a creator can only pick their own campaigns anyway).
+  // Resolve scope from the URL. `selected` only resolves against the in-scope program
+  // list (a creator's own; ALL of them for staff), so a non-staff creator can never
+  // reach another campaign's board by tampering `c`.
   const wKey = searchParams.w && WINDOW_MAP[searchParams.w] ? searchParams.w : "7";
   const window = WINDOW_MAP[wKey];
   const selected = searchParams.c && searchParams.c !== "overall"
@@ -51,7 +64,10 @@ export default async function LeaderboardPage({
           <div className="cup"><i className="ti ti-trophy" /></div>
           <div>
             <h1>Leaderboard</h1>
-            <div className="sub">{scopeLabel} · top creators by views</div>
+            <div className="sub">
+              {scopeLabel} · top creators by views
+              {staff && <span className="staff-badge">staff view</span>}
+            </div>
           </div>
         </div>
         <CampaignSelect programs={programs} campaign={campaign} />
@@ -69,7 +85,7 @@ export default async function LeaderboardPage({
       ) : board.entries.length === 0 ? (
         <p className="foot" style={{ marginTop: 48 }}>No ranked creators on this board yet.</p>
       ) : (
-        <BoardBody board={board} handles={handles} youId={creator.id} />
+        <BoardBody board={board} handles={handles} youId={youId} />
       )}
 
       <div className="topbar" style={{ marginTop: 24, justifyContent: "flex-end" }}>

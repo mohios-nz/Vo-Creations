@@ -124,6 +124,13 @@ The leaderboard (`/leaderboard`, → `leaderboard.vocreations.com`) launched wit
   cutover round-trip test.**
 - **YOU highlight** renders on both the list (ranks 4+) and the podium (top-3 card carries
   a YOU badge + teal treatment) — the motivational hook must be visible at launch.
+- **Staff access = Google OAuth + allow-list (decided):** agency staff sign in with Google
+  (Supabase Google provider) and get the FULL dashboard — overall + ALL campaign boards,
+  switcher unscoped, "staff view" badge, no YOU (staff aren't ranked). Allow-list is
+  `STAFF_EMAILS` (comma-separated) OR `STAFF_EMAIL_DOMAINS` (default `mohios.com,vocreations.com`),
+  checked in `isStaffEmail()` before creator resolution. Non-staff unknown emails still get
+  the directed screen. The magic-link + OAuth flows share `/auth/callback` (PKCE). **This
+  same Google client is the planned auth for the Phase 4 CRM.**
 - **Unknown email → directed screen (not a dead end):** "We don't recognize this email
   yet — DM Danny on Slack with the email you want to use." No data shown.
 - **Seeding:** `scripts/seed-creator-emails.mjs` loads `creators.email` from a CSV
