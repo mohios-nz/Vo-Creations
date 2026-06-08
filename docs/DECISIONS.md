@@ -114,6 +114,16 @@ The leaderboard (`/leaderboard`, → `leaderboard.vocreations.com`) launched wit
   input trimmed). The seed maps `email_primary → email`, `email_alt → alt_email`.
 - **Open-redirect guard:** `/auth/callback` accepts only same-origin LOCAL `next` paths
   (must start with `/`, not `//` or `/\`); anything else falls back to `/leaderboard`.
+- **Verification caveats (carry forward):**
+  (a) The cross-campaign tamper defense (`page.tsx` resolves `c` only against the
+  creator's own `getCreatorPrograms`) was verified by **code-path equivalence** — prod
+  currently has a single active program, so there's no second campaign to tamper toward.
+  **Re-verify with real data when a second campaign goes live.**
+  (b) F1's **success-path** redirect branch (valid code → `${origin}${next}`) is exercised
+  only after a real magic-link round-trip, which needs the SMTP cutover. **Pending the
+  cutover round-trip test.**
+- **YOU highlight** renders on both the list (ranks 4+) and the podium (top-3 card carries
+  a YOU badge + teal treatment) — the motivational hook must be visible at launch.
 - **Unknown email → directed screen (not a dead end):** "We don't recognize this email
   yet — DM Danny on Slack with the email you want to use." No data shown.
 - **Seeding:** `scripts/seed-creator-emails.mjs` loads `creators.email` from a CSV

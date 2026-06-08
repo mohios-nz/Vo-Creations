@@ -45,6 +45,8 @@
 .lb-root .podium { display: grid; grid-template-columns: 1fr 1.18fr 1fr; align-items: end; gap: 12px; margin-bottom: 14px; }
 .lb-root .pod { position: relative; border-radius: 20px; padding: 20px 12px 18px; text-align: center; border: 1px solid var(--line); background: var(--card); backdrop-filter: blur(8px); }
 .lb-root .pod.p1 { padding-top: 30px; border-color: rgba(247, 151, 30, 0.5); box-shadow: 0 0 0 1px rgba(255, 210, 80, 0.25), 0 18px 50px rgba(247, 151, 30, 0.22); }
+.lb-root .pod.you { border-color: rgba(45, 212, 191, 0.6); box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.3), 0 14px 40px rgba(16, 185, 129, 0.18); }
+.lb-root .pod .nm .tag { margin-left: 6px; vertical-align: middle; }
 .lb-root .crown { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 26px; }
 .lb-root .pod .av { margin: 0 auto 10px; }
 .lb-root .medal { position: absolute; top: 12px; right: 12px; font-size: 12px; font-weight: 800; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #1a1030; }

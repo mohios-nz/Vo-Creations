@@ -113,12 +113,16 @@ function BoardBody({ board, handles, youId }: { board: Leaderboard; handles: Han
         {podiumOrder.map((idx) => {
           const e = top3[idx];
           if (!e) return <div key={idx} />;
+          const you = e.creatorId === youId;
           return (
-            <div key={idx} className={`pod p${idx + 1}`}>
+            <div key={idx} className={`pod p${idx + 1}${you ? " you" : ""}`}>
               {idx === 0 && <div className="crown">👑</div>}
               <div className={`medal m${idx + 1}`}>{idx + 1}</div>
               <Avatar name={e.name} />
-              <div className="nm">{e.name}</div>
+              <div className="nm">
+                {e.name}
+                {you && <span className="tag">YOU</span>}
+              </div>
               <div className="hd"><HandleLine entry={e} handles={handles} /></div>
               <div className="vw">{e.views.toLocaleString("en-US")}</div>
               <div className="vl">views</div>
