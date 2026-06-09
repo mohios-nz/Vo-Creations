@@ -152,6 +152,33 @@ The leaderboard (`/leaderboard`, → `leaderboard.vocreations.com`) launched wit
 row). Supersedes the interim shared-password / overall-board-only plan. **Supersedes
 the old `Phase 5` "creator auth" step — pulled forward into launch.**
 
+## topic: leaderboard-backfill — _2026-06_
+
+Backfilled 7 months of history (2025-11-10 → 2026-06-07) so the 7d/30d boards render
+real rankings instead of "warming up" (live snapshots only started 2026-06-07).
+Tool: `scripts/backfill-snapshots.mjs` (dry-run by default; `--apply` writes).
+
+- **Source data:** a per-brand CSV export (`backfill-input.csv`, 27 brands × 78 creators,
+  brand-grain) + `handles-by-campaign.csv`. Gitignored (PII) — never committed.
+- **Append-only:** `insert … on conflict (snapshot_date, program_id, creator_id) do
+  nothing`. The live cron's rows are authoritative; the CSV only fills history before them.
+- **Brand → program:** reuse an existing program by name; else create (`source='backfill'`,
+  `status='ended'`). The 27 backfill brands were all net-new (Allinmotion, the only live
+  program, was NOT in this export — its history is a separate follow-up backfill).
+- **One human = one creator_id (condition A):** before creating, each backfill creator is
+  matched to `active-creators-consolidated.csv` (the master roster) by normalized name; on
+  match the row uses the master's **canonical name** so the email seed converges on it
+  later (emails arrive via the seed, not here). 67/77 matched the master, 10 net-new
+  (tagged in `creators.notes`; 4 are `Ghost: @handle` unattributed accounts).
+- Also writes `program_creators` (participation, so the per-creator switcher works) and
+  enriches `campaign_accounts` from the handles file.
+- **Connection:** uses the DIRECT connection (`POSTGRES_URL_NON_POOLING`), not the
+  transaction pooler — the pooler closes long multi-statement transactions; inserts are
+  batched (chunks of 500) to keep it short.
+- **Applied:** 27 programs, 77 creators, +714 campaign_accounts, 15,682 snapshots.
+  Verified 5/5 spot-check (CSV lifetime == DB). **No-seam reconciliation (backfill latest
+  ≈ live) is deferred to the Allinmotion follow-up** (disjoint datasets until then).
+
 ## topic: payments — _2026-06_
 
 Removed the website checkout (`app/mentorship/enroll/` page and `app/api/checkout/`
