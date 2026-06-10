@@ -22,6 +22,32 @@ import { db } from "@/lib/db/client";
  *  per-platform grain. Override per call via buildAccountabilityReport({ target }). */
 export const DAILY_POST_TARGET = 4;
 
+/**
+ * Companies whose programs NEVER appear in the #campaigns digest. #campaigns is
+ * client-campaigns only; the internal `#Allinmotion (CPM Creators)` pool belongs to
+ * company "Vo Creations" (the agency's own creators, not a client accountability
+ * target), so it is filtered out here at the source — it cannot drive `asOf` or show
+ * up as a section. THIS IS THE SINGLE REVERSAL POINT: empty the set (or remove the
+ * name) to let those programs back in. Programs with a null company_name are kept.
+ * DECISION 2026-06: see docs/DECISIONS.md topic: campaign-accountability.
+ */
+export const EXCLUDED_COMPANY_NAMES: ReadonlySet<string> = new Set([
+  "Vo Creations",
+]);
+
+/** SQL predicate dropping EXCLUDED_COMPANY_NAMES. `companyCol` is the company_name
+ *  column reference for the query it is spliced into (alias differs per query).
+ *  Returns empty SQL when the set is empty, i.e. the filter fully disabled. */
+function excludeCompaniesSql(companyCol: ReturnType<typeof sql>) {
+  const names = Array.from(EXCLUDED_COMPANY_NAMES);
+  if (!names.length) return sql``;
+  const list = sql.join(
+    names.map((nm) => sql`${nm}`),
+    sql`, `
+  );
+  return sql` and (${companyCol} is null or ${companyCol} not in (${list}))`;
+}
+
 export type CreatorStatus = "on_track" | "behind" | "no_data";
 
 export interface CreatorAccountability {
@@ -115,7 +141,8 @@ function classify(postsDelta: number, expected: number): CreatorStatus {
 }
 
 /**
- * Build the accountability report across every ACTIVE program (status='active').
+ * Build the accountability report across every ACTIVE program (status='active'),
+ * minus the internal-pool companies in EXCLUDED_COMPANY_NAMES (client-only digest).
  * Ended/backfill campaigns are excluded by status, so a frozen historical snapshot
  * can never masquerade as today's accountability.
  *
@@ -137,7 +164,7 @@ export async function buildAccountabilityReport(opts?: {
     const [r] = await db.execute<{ d: string | null }>(sql`
       select max(s.snapshot_date)::text d
       from snapshots s join programs p on p.id = s.program_id
-      where p.status = 'active'
+      where p.status = 'active'${excludeCompaniesSql(sql`p.company_name`)}
     `);
     asOf = r?.d ?? null;
   }
@@ -148,7 +175,8 @@ export async function buildAccountabilityReport(opts?: {
   // For each active program + creator: the two most recent snapshots at/<= asOf.
   const rows = await db.execute<Row>(sql`
     with active_progs as (
-      select id, name, company_name from programs where status = 'active'
+      select id, name, company_name from programs
+      where status = 'active'${excludeCompaniesSql(sql`company_name`)}
     ),
     ranked as (
       select s.program_id, s.creator_id, s.snapshot_date,

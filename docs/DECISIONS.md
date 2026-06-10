@@ -39,11 +39,19 @@ default) + `app/api/cron/campaign-digest` (strict, daily). New env
   numbers. Ended campaigns drop out by status. Every printed number traces to a snapshots row.
 - **KNOWN BLOCKER (shared with `topic: alltime-repull`): only `#Allinmotion (CPM Creators)`
   syncs live** — prod has the single `SIDESHIFT_API_KEY` (Vo Creations company), not the
-  multi-brand `SIDESHIFT_KEYS`. So today the digest only covers Allinmotion (the agency's
-  internal CPM pool, not a client campaign), and Allinmotion has posted 0 net content since
-  2026-06-07. The engine is campaign-agnostic and auto-covers Aonic/eComrads/CoWorker the
-  moment their brand keys are added. **Verified Phase 0/2:** DB latest snapshot posts ==
-  live Sideshift API, 25/25 exact; digest deltas trace to the raw snapshots rows.
+  multi-brand `SIDESHIFT_KEYS`. Allinmotion is the agency's internal CPM pool, not a client
+  campaign, and has posted 0 net content since 2026-06-07. The engine is campaign-agnostic and
+  auto-covers Aonic/eComrads/CoWorker the moment their brand keys are added. **Verified Phase
+  0/2:** DB latest snapshot posts == live Sideshift API, 25/25 exact; digest deltas trace to
+  the raw snapshots rows.
+- **CLIENT-ONLY FILTER — built (2026-06-10).** #campaigns is client campaigns only, so the
+  internal pool is excluded at the source: `EXCLUDED_COMPANY_NAMES = { "Vo Creations" }` in
+  [`lib/queries/accountability.ts`](../lib/queries/accountability.ts) drops any program whose
+  `company_name` is in the set from `buildAccountabilityReport` — it cannot drive `asOf` or
+  render a section (programs with a null company_name are kept). That is the **single reversal
+  point**: empty the set to let the internal pool back in. Consequence today: with Allinmotion
+  (company "Vo Creations") the only live program, the report is correctly **empty** until the
+  client brand keys land. Verified by dry-run (below).
 - **Metric APPROVED (Danny, 2026-06-10); NOT activated.** The posts/creator/day metric and the
   behind vs no-data distinction are signed off, and the engine is merged to `main` ready to run.
   But the digest does NOT post and the cron does NOT fire until the checklist below. Two
@@ -59,10 +67,9 @@ default) + `app/api/cron/campaign-digest` (strict, daily). New env
 2. **Verify ingest.** After the next 09:00 UTC sync, confirm `programs WHERE status='active'`
    includes the client campaigns with a snapshot dated today, then run `npm run digest:campaign`
    (dry-run) and check they render with real deltas.
-3. **(Decision) Exclude the internal pool?** Allinmotion is `status='active'`, so it will appear in
-   the digest next to the clients. If #campaigns should be client-only, add a program/company
-   filter (e.g. exclude `company_name='Vo Creations'`) to `buildAccountabilityReport` before
-   step 5. Recorded as an open call, not yet built.
+3. **Internal-pool exclusion — already built, nothing to do.** The client-only filter
+   (`EXCLUDED_COMPANY_NAMES`, see above) keeps Allinmotion / company "Vo Creations" out of the
+   digest permanently. To include it again, empty that set in `lib/queries/accountability.ts`.
 4. **Set the channel webhook.** Create a Slack Incoming Webhook bound to #campaigns; set
    `SLACK_CAMPAIGNS_WEBHOOK_URL` in Vercel (and `.env.local` for local posting).
 5. **Register the cron.** Add to `vercel.json` `crons`:
