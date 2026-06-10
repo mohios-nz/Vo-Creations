@@ -403,7 +403,7 @@ export default function AboutPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-gradient-to-br from-accent to-[#E08A1E] text-bg font-bold text-base px-9 py-4 rounded-full hover:shadow-[0_0_40px_rgba(245,166,35,0.3)] hover:-translate-y-0.5 transition-all"
           >
-            Apply for a campaign &rarr;
+            make them remember. &rarr;
           </a>
           <Link
             href="/mentorship"

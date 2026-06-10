@@ -1,7 +1,7 @@
 export default function CTABlock({
   heading = "Ready to scale with UGC?",
   sub = "10 new campaigns per month. Tell us about your brand.",
-  buttonText = "Apply for a campaign slot →",
+  buttonText = "make them remember. →",
   href = "https://calendar.app.google/BMAP5qH6Qwtkm5Yr5",
 }: {
   heading?: string;

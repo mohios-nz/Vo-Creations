@@ -53,7 +53,7 @@ export default function Nav() {
             rel="noopener noreferrer"
             className="bg-accent text-bg font-bold text-[13px] px-5 md:px-6 py-2.5 rounded-full hover:shadow-[0_0_24px_rgba(245,166,35,0.3)] hover:-translate-y-px transition-all"
           >
-            Apply for a slot
+            make them remember.
           </a>
 
           <button
