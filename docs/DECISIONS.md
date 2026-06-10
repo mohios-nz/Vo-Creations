@@ -135,6 +135,16 @@ The leaderboard (`/leaderboard`, → `leaderboard.vocreations.com`) launched wit
   input trimmed). The seed maps `email_primary → email`, `email_alt → alt_email`.
 - **Open-redirect guard:** `/auth/callback` accepts only same-origin LOCAL `next` paths
   (must start with `/`, not `//` or `/\`); anything else falls back to `/leaderboard`.
+- **One-click first login (email links use `verifyOtp`, not the PKCE code):** the callback
+  verifies EMAIL magic links via `supabase.auth.verifyOtp({ type, token_hash })`, which needs
+  no `code_verifier` cookie — so the first-ever click establishes a session in any browser
+  and survives email-scanner prefetch (the PKCE `?code=` path needed the originating browser's
+  verifier → could require a second email). OAuth (Google) still uses `exchangeCodeForSession`.
+  **Required Supabase config:** the email template Confirmation URL must be
+  `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/leaderboard`
+  (`type=email` — a new user's link is internally `type=signup`, and only `email`/`magiclink`
+  verify it; `email` is the one that works through the SSR server client). Verified end-to-end
+  with a throwaway first-login email via the admin API: callback → 307 `/leaderboard` + session.
 - **Verification caveats (carry forward):**
   (a) The cross-campaign tamper defense (`page.tsx` resolves `c` only against the
   creator's own `getCreatorPrograms`) was verified by **code-path equivalence** — prod
