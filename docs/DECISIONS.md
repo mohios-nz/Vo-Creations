@@ -44,10 +44,32 @@ default) + `app/api/cron/campaign-digest` (strict, daily). New env
   2026-06-07. The engine is campaign-agnostic and auto-covers Aonic/eComrads/CoWorker the
   moment their brand keys are added. **Verified Phase 0/2:** DB latest snapshot posts ==
   live Sideshift API, 25/25 exact; digest deltas trace to the raw snapshots rows.
-- **Schedule NOT yet registered (Danny-gated).** The dry-run was DM'd to Danny for approval;
-  the brief requires his sign-off before switching the channel to #campaigns and adding the
-  `vercel.json` cron. **When approved:** set `SLACK_CAMPAIGNS_WEBHOOK_URL` in Vercel and add a
-  `crons` entry for `/api/cron/campaign-digest` at a time AFTER the 09:00 UTC sync (e.g. 09:30).
+- **Metric APPROVED (Danny, 2026-06-10); NOT activated.** The posts/creator/day metric and the
+  behind vs no-data distinction are signed off, and the engine is merged to `main` ready to run.
+  But the digest does NOT post and the cron does NOT fire until the checklist below. Two
+  independent off-switches keep it dark: (a) `/api/cron/campaign-digest` is absent from
+  `vercel.json` `crons` (never scheduled), and (b) `SLACK_CAMPAIGNS_WEBHOOK_URL` is unset, so
+  `notifySlack` returns false (no post). **Do NOT activate against `#Allinmotion` alone** — it is
+  the internal Vo Creations pool, not the client accountability target.
+
+**Activation checklist — flip the digest live to #campaigns (do ALL, in order):**
+1. **Add the client brand keys.** Put the Aonic, eComrads, and CoWorker Sideshift API keys into
+   `SIDESHIFT_KEYS` (Vercel **and** `.env.local`). Until this, the only `status='active'` program
+   is the internal `#Allinmotion` pool, so there is nothing real to post — do not activate first.
+2. **Verify ingest.** After the next 09:00 UTC sync, confirm `programs WHERE status='active'`
+   includes the client campaigns with a snapshot dated today, then run `npm run digest:campaign`
+   (dry-run) and check they render with real deltas.
+3. **(Decision) Exclude the internal pool?** Allinmotion is `status='active'`, so it will appear in
+   the digest next to the clients. If #campaigns should be client-only, add a program/company
+   filter (e.g. exclude `company_name='Vo Creations'`) to `buildAccountabilityReport` before
+   step 5. Recorded as an open call, not yet built.
+4. **Set the channel webhook.** Create a Slack Incoming Webhook bound to #campaigns; set
+   `SLACK_CAMPAIGNS_WEBHOOK_URL` in Vercel (and `.env.local` for local posting).
+5. **Register the cron.** Add to `vercel.json` `crons`:
+   `{ "path": "/api/cron/campaign-digest", "schedule": "30 9 * * *" }` (after the 09:00 sync; uses
+   the existing `CRON_SECRET` Bearer). Deploy by merging to `main`.
+- **Deactivate / rollback:** remove the `vercel.json` cron entry, or unset
+  `SLACK_CAMPAIGNS_WEBHOOK_URL` (posts become no-ops). No code change needed either way.
 
 **Why:** an audit-tone "who is behind today" digest mirrors the sales-CRM daily intelligence,
 pointed at creator posting. Proving it against live data before scheduling was the explicit

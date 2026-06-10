@@ -62,8 +62,9 @@ the leaderboard is the first tenant). Read the code, not a copy here. _Why:
   vs a target (`DAILY_POST_TARGET`); [`lib/digest/campaign-digest.ts`](../lib/digest/campaign-digest.ts)
   renders + posts to **#campaigns** (`SLACK_CAMPAIGNS_WEBHOOK_URL`). Manual:
   `npm run digest:campaign` (dry-run default). Cron: `app/api/cron/campaign-digest`
-  (`strict` → SYNC STALE gate). _Why + known limits (no per-platform grain; only Allinmotion
-  syncs live; schedule pending): DECISIONS `topic: campaign-accountability`._
+  (`strict` → SYNC STALE gate). **Currently DRY-RUN ONLY** — not in `vercel.json` `crons` and
+  `SLACK_CAMPAIGNS_WEBHOOK_URL` unset, so it never posts. _Activation checklist + known limits
+  (no per-platform grain; only Allinmotion syncs live): DECISIONS `topic: campaign-accountability`._
 - **Probe:** `scripts/probe-sideshift.mjs` (Phase 0 discovery; fixtures gitignored, PII).
 - **Leaderboard (`app/leaderboard/`):** gated creator board (→ `leaderboard.vocreations.com`).
   Supabase **magic-link** auth (`lib/supabase/*`, session refresh in `middleware.ts`);
