@@ -15,6 +15,13 @@
       "when": 1780877663617,
       "tag": "0001_slippery_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781057562789,
+      "tag": "0002_enable_rls_public",
+      "breakpoints": true
     }
   ]
 }
