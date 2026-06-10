@@ -249,7 +249,7 @@ export default function MaxxdCampaignPage() {
               href="/apply"
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent text-bg font-outfit font-semibold rounded-lg hover:bg-accent-light transition-colors duration-200"
             >
-              Apply for a campaign slot
+              make them remember.
               <span aria-hidden="true">&rarr;</span>
             </a>
           </div>

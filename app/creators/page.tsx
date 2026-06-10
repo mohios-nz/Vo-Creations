@@ -253,7 +253,7 @@ export default function CreatorsPage() {
       <CTABlock
         heading="Want these creators on your campaign?"
         sub="We match creators to your brand, audience, and goals. No marketplace. Handpicked."
-        buttonText="Apply for a campaign slot →"
+        buttonText="make them remember. →"
       />
 
       {/* Mentorship link */}

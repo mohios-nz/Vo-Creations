@@ -50,7 +50,7 @@ const showcaseVideos = [
 ];
 
 const agencyFaqs = [
-  { q: "How many creators will be on my campaign?", a: "3 vetted creators for Starter, 6 for Growth. Every creator is trained through our mentorship. No freelancers." },
+  { q: "How many creators will be on my campaign?", a: "6 vetted creators for Starter, 12 for Growth. Every creator is trained through our mentorship. No freelancers." },
   { q: "What platforms do you post on?", a: "TikTok, Instagram Reels, YouTube Shorts, and Facebook. All four platforms, simultaneously." },
   { q: "How quickly can a campaign start?", a: "9 days from signed contract to first videos going live. Strategy and creator matching happen in Days 1-2." },
   { q: "What happens if creators underperform?", a: "We cut underperformers and replace them. That's the VoC Method. Test 7 formats, keep the winners, triple down." },
@@ -104,7 +104,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-gradient-to-br from-accent to-[#E08A1E] text-bg font-bold text-base px-9 py-4 rounded-full hover:shadow-[0_0_40px_rgba(245,166,35,0.3)] hover:-translate-y-0.5 transition-all"
           >
-            Apply for a campaign slot →
+            make them remember. →
           </a>
           <a
             href="#results"
@@ -315,14 +315,14 @@ export default function Home() {
                 Starter
               </div>
               <div className="text-[40px] font-black text-text tracking-tight leading-none mb-1">
-                $10,000
+                $20,000
                 <span className="text-base font-medium text-text-dim">/mo</span>
               </div>
               <div className="h-px bg-border my-5" />
               <ul className="space-y-3">
                 {[
-                  "180 unique videos / 720 posts",
-                  "3 vetted creators",
+                  "360 unique videos / 1,440 posts",
+                  "6 vetted creators",
                   "TikTok · Instagram · YouTube · Facebook",
                   "30-day campaign",
                   "VoC Method included",
@@ -345,14 +345,14 @@ export default function Home() {
                 Growth
               </div>
               <div className="text-[40px] font-black text-text tracking-tight leading-none mb-1">
-                $20,000
+                $30,000
                 <span className="text-base font-medium text-text-dim">/mo</span>
               </div>
               <div className="h-px bg-border my-5" />
               <ul className="space-y-3">
                 {[
-                  "360 unique videos / 1,440 posts",
-                  "6 vetted creators",
+                  "600 unique videos / 2,400 posts",
+                  "12 vetted creators",
                   "TikTok · Instagram · YouTube · Facebook",
                   "30-day campaign",
                   "VoC Method included",
@@ -374,7 +374,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-gradient-to-br from-accent to-[#E08A1E] text-bg font-bold text-base px-9 py-4 rounded-full hover:shadow-[0_0_40px_rgba(245,166,35,0.3)] hover:-translate-y-0.5 transition-all"
             >
-              Apply for a campaign slot →
+              make them remember. →
             </a>
           </div>
         </div>
