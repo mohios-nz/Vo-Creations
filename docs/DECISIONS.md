@@ -10,6 +10,27 @@ edit the old entry. For present-tense "how it works now," see
 
 ---
 
+## topic: security — _2026-06_
+
+Enabled **Row Level Security on every public table** (migration
+`0002_enable_rls_public.sql`), with **no policies**.
+
+**Why:** Supabase serves a PostgREST data API at `https://<ref>.supabase.co/rest/v1/<table>`
+authenticated by the **anon key — which is public** (it ships to the browser for auth).
+With RLS off, anyone with that key could read/write the tables directly (verified: anon
+`GET /rest/v1/creators` returned live PII before the fix). The app does **not** use that
+API — confirmed all data access is Drizzle over the direct/pooled Postgres connection
+(`supabase.*` calls are auth-only: signInWithOtp/OAuth, getUser, exchangeCodeForSession,
+signOut). That connection is the `postgres` role (`rolbypassrls = true`), so RLS does not
+affect it.
+
+**Effect:** RLS enabled + zero policies = deny-all for the `anon`/`authenticated` PostgREST
+roles; the Drizzle app path bypasses RLS and is unaffected. Verified after: anon SELECT → 0
+rows on all 7 tables, anon INSERT → 401 "violates row-level security policy", Drizzle reads
+still return all rows. No `service_role` key is referenced anywhere in the codebase (clients
+use only `NEXT_PUBLIC_SUPABASE_ANON_KEY`). If a product ever needs the Supabase data API,
+add real policies then — do not just disable RLS.
+
 ## topic: sideshift-api — _2026-06_
 
 Phase 0 probe (`scripts/probe-sideshift.mjs`) confirmed the real Sideshift API
