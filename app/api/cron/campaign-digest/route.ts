@@ -31,7 +31,7 @@ export async function GET(req: Request) {
       stale,
       posted,
       asOf: report.asOf,
-      campaigns: report.campaigns.length,
+      companies: report.companies.length,
     });
   } catch (err) {
     return NextResponse.json(
