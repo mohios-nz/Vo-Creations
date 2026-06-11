@@ -62,8 +62,10 @@ default) + `app/api/cron/campaign-digest` (strict, daily). New env
 
 **Activation checklist — flip the digest live to #campaigns (do ALL, in order):**
 1. **Add the client brand keys.** Put the Aonic, eComrads, and CoWorker Sideshift API keys into
-   `SIDESHIFT_KEYS` (Vercel **and** `.env.local`). Until this, the only `status='active'` program
-   is the internal `#Allinmotion` pool, so there is nothing real to post — do not activate first.
+   `SIDESHIFT_KEYS` (Vercel **and** `.env.local`), **and include the Allinmotion key too** so the
+   internal pool keeps ingesting (see the `SIDESHIFT_KEYS` replaces `SIDESHIFT_API_KEY` caveat below).
+   Until this, the only `status='active'` program is the internal `#Allinmotion` pool, so there is
+   nothing real to post — do not activate first.
 2. **Verify ingest.** After the next 09:00 UTC sync, confirm `programs WHERE status='active'`
    includes the client campaigns with a snapshot dated today, then run `npm run digest:campaign`
    (dry-run) and check they render with real deltas.
@@ -77,6 +79,23 @@ default) + `app/api/cron/campaign-digest` (strict, daily). New env
    the existing `CRON_SECRET` Bearer). Deploy by merging to `main`.
 - **Deactivate / rollback:** remove the `vercel.json` cron entry, or unset
   `SLACK_CAMPAIGNS_WEBHOOK_URL` (posts become no-ops). No code change needed either way.
+
+**`SIDESHIFT_KEYS` REPLACES `SIDESHIFT_API_KEY` entirely (Allinmotion caveat) — verified 2026-06-11.**
+The multi-key adapter reads `SIDESHIFT_KEYS || SIDESHIFT_API_KEY`: the single `SIDESHIFT_API_KEY` is
+used ONLY when `SIDESHIFT_KEYS` is empty (it is a fallback, not a merge). So the moment `SIDESHIFT_KEYS`
+is set, `SIDESHIFT_API_KEY` (the Allinmotion / "Vo Creations" key) is never read. The Allinmotion key
+is **not** one of the client brand keys in the map, so the prod `SIDESHIFT_KEYS` value MUST include it
+explicitly — **29 entries (28 brands + Allinmotion), not 28** — or the internal pool stops being
+ingested and goes stale on the leaderboard. (Until the multi-key adapter merges to `main` it lives only
+on `feat/multikey-sync-alltime-repull`; prod still uses the single `SIDESHIFT_API_KEY` and ignores
+`SIDESHIFT_KEYS` entirely — so the keys do not ingest in prod until that branch merges.)
+
+**Process learning — one branch/worktree per feature.** Two unrelated features (the multi-key sync and
+this digest) once shared a single uncommitted working tree across sessions and got fused into one
+`git stash`, which was slow and risky to untangle. Going forward: create a dedicated branch or
+`git worktree` per feature BEFORE the first edit; commit a checkpoint before switching context; and keep
+code and doc changes on **separate** branches (e.g. this learning shipped on `docs/digest-activation-learnings`,
+the company-regroup on `feat/digest-group-by-company` — not bundled).
 
 **Why:** an audit-tone "who is behind today" digest mirrors the sales-CRM daily intelligence,
 pointed at creator posting. Proving it against live data before scheduling was the explicit
