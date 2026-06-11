@@ -34,7 +34,7 @@ async function main() {
 
   console.error(
     `[digest] asOf=${report.asOf} strict=${strict} stale=${stale} ` +
-      `campaigns=${report.campaigns.length} post=${post} posted=${posted}`
+      `companies=${report.companies.length} post=${post} posted=${posted}`
   );
   console.error(
     `[digest] sync: lastRun=${report.sync.lastRunDate}/${report.sync.lastRunStatus} ` +

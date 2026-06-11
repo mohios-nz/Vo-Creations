@@ -68,13 +68,16 @@ export interface CreatorAccountability {
   since: string | null;
 }
 
-export interface CampaignAccountability {
-  programId: string;
-  programName: string;
-  companyName: string | null;
-  /** latest snapshot date present for this campaign (YYYY-MM-DD). */
+export interface CompanyAccountability {
+  /** the brand this section aggregates (programs.company_name; falls back to the
+   *  program name for a program that has no company). One section per company. */
+  company: string;
+  /** the program tiers folded into this company (e.g. Inner Circle, Vo Creator L2). */
+  programNames: string[];
+  /** latest snapshot date present across this company's programs (YYYY-MM-DD). */
   asOf: string;
   target: number;
+  /** creators de-duped by stable creator_id across the company's tiers (counted once). */
   creators: CreatorAccountability[];
   behind: CreatorAccountability[];
   onTrack: CreatorAccountability[];
@@ -94,7 +97,8 @@ export interface AccountabilityReport {
   asOf: string | null;
   target: number;
   sync: SyncHealth;
-  campaigns: CampaignAccountability[];
+  /** one section per company (brand); program tiers aggregated, creators de-duped by id. */
+  companies: CompanyAccountability[];
 }
 
 type Row = {
@@ -140,6 +144,55 @@ function classify(postsDelta: number, expected: number): CreatorStatus {
   return postsDelta >= expected ? "on_track" : "behind";
 }
 
+/** Accountability for ONE (program, creator) row: a delta when two snapshots exist,
+ *  else no_data (a single snapshot is never a fabricated zero). */
+function rowToEntry(r: Row, target: number): CreatorAccountability {
+  if (r.prev_date == null) {
+    return {
+      creatorId: r.creator_id, name: r.creator_name, status: "no_data",
+      postsDelta: null, viewsDelta: null, gapDays: null, expected: null,
+      asOf: r.cur_date, since: null,
+    };
+  }
+  const gapDays = Math.max(1, dayDiff(r.cur_date, r.prev_date));
+  const postsDelta = Number(r.cur_posts) - Number(r.prev_posts);
+  const viewsDelta = Number(r.cur_views) - Number(r.prev_views);
+  const expected = target * gapDays;
+  return {
+    creatorId: r.creator_id, name: r.creator_name, status: classify(postsDelta, expected),
+    postsDelta, viewsDelta, gapDays, expected, asOf: r.cur_date, since: r.prev_date,
+  };
+}
+
+/** Collapse a creator's per-tier entries (SAME creator_id, one company) into a single
+ *  company-level entry. The target is per-creator-per-day, so a creator's posts are
+ *  SUMMED across the tiers they appear in and the creator is counted ONCE. Tiers where
+ *  the creator has only one snapshot contribute nothing; a creator with no computable
+ *  tier stays no_data. De-dup is by stable creator_id, so two distinct accounts that
+ *  share a display name remain two creators. */
+function mergeCreatorTiers(entries: CreatorAccountability[], target: number): CreatorAccountability {
+  const { creatorId, name } = entries[0];
+  const asOf = entries.reduce((m, e) => (e.asOf > m ? e.asOf : m), entries[0].asOf);
+  const computable = entries.filter((e) => e.status !== "no_data");
+  if (!computable.length) {
+    return {
+      creatorId, name, status: "no_data", postsDelta: null, viewsDelta: null,
+      gapDays: null, expected: null, asOf, since: null,
+    };
+  }
+  const postsDelta = computable.reduce((s, e) => s + (e.postsDelta ?? 0), 0);
+  const viewsDelta = computable.reduce((s, e) => s + (e.viewsDelta ?? 0), 0);
+  // The daily cron snapshots every tier on the same dates, so the gaps match; max is a
+  // safe guard if a creator joined one tier later than another.
+  const gapDays = Math.max(...computable.map((e) => e.gapDays ?? 1));
+  const expected = target * gapDays;
+  const since = computable.map((e) => e.since as string).sort()[0]; // earliest baseline
+  return {
+    creatorId, name, status: classify(postsDelta, expected),
+    postsDelta, viewsDelta, gapDays, expected, asOf, since,
+  };
+}
+
 /**
  * Build the accountability report across every ACTIVE program (status='active'),
  * minus the internal-pool companies in EXCLUDED_COMPANY_NAMES (client-only digest).
@@ -169,7 +222,7 @@ export async function buildAccountabilityReport(opts?: {
     asOf = r?.d ?? null;
   }
   if (!asOf) {
-    return { asOf: null, target, sync, campaigns: [] };
+    return { asOf: null, target, sync, companies: [] };
   }
 
   // For each active program + creator: the two most recent snapshots at/<= asOf.
@@ -208,73 +261,55 @@ export async function buildAccountabilityReport(opts?: {
     order by ap.name asc, c.name asc
   `);
 
-  const byProgram = new Map<string, CampaignAccountability>();
+  // Group by COMPANY (brand), folding its program tiers together. A program with no
+  // company_name stays its own section (keyed by program). Within a company, a creator
+  // appearing in multiple tiers is de-duped by stable creator_id and counted ONCE
+  // (their posts summed across tiers — the target is per-creator-per-day, not per-tier).
+  type Group = {
+    company: string;
+    programNames: Set<string>;
+    asOf: string;
+    byCreator: Map<string, CreatorAccountability[]>;
+  };
+  const byCompany = new Map<string, Group>();
   for (const r of rows as unknown as Row[]) {
-    let camp = byProgram.get(r.program_id);
-    if (!camp) {
-      camp = {
-        programId: r.program_id,
-        programName: r.program_name,
-        companyName: r.company_name,
-        asOf: r.cur_date,
-        target,
-        creators: [],
-        behind: [],
-        onTrack: [],
-        noData: [],
-      };
-      byProgram.set(r.program_id, camp);
+    const key = r.company_name ?? `program:${r.program_id}`;
+    let g = byCompany.get(key);
+    if (!g) {
+      g = { company: r.company_name ?? r.program_name, programNames: new Set(), asOf: r.cur_date, byCreator: new Map() };
+      byCompany.set(key, g);
     }
-    // track the freshest snapshot seen for this campaign
-    if (r.cur_date > camp.asOf) camp.asOf = r.cur_date;
-
-    let entry: CreatorAccountability;
-    if (r.prev_date == null) {
-      // Only one snapshot for this creator → no measurable window. Never a fake 0.
-      entry = {
-        creatorId: r.creator_id,
-        name: r.creator_name,
-        status: "no_data",
-        postsDelta: null,
-        viewsDelta: null,
-        gapDays: null,
-        expected: null,
-        asOf: r.cur_date,
-        since: null,
-      };
-    } else {
-      const gapDays = Math.max(1, dayDiff(r.cur_date, r.prev_date));
-      const postsDelta = Number(r.cur_posts) - Number(r.prev_posts);
-      const viewsDelta = Number(r.cur_views) - Number(r.prev_views);
-      const expected = target * gapDays;
-      entry = {
-        creatorId: r.creator_id,
-        name: r.creator_name,
-        status: classify(postsDelta, expected),
-        postsDelta,
-        viewsDelta,
-        gapDays,
-        expected,
-        asOf: r.cur_date,
-        since: r.prev_date,
-      };
-    }
-    camp.creators.push(entry);
+    g.programNames.add(r.program_name);
+    if (r.cur_date > g.asOf) g.asOf = r.cur_date;
+    const entry = rowToEntry(r, target);
+    const list = g.byCreator.get(entry.creatorId);
+    if (list) list.push(entry);
+    else g.byCreator.set(entry.creatorId, [entry]);
   }
 
-  const campaigns = Array.from(byProgram.values());
-  for (const camp of campaigns) {
-    camp.behind = camp.creators.filter((c) => c.status === "behind");
-    camp.onTrack = camp.creators.filter((c) => c.status === "on_track");
-    camp.noData = camp.creators.filter((c) => c.status === "no_data");
-    // Lead with the worst gap (largest shortfall first), then by name.
-    camp.behind.sort((a, b) => {
-      const sa = (a.expected ?? 0) - (a.postsDelta ?? 0);
-      const sb = (b.expected ?? 0) - (b.postsDelta ?? 0);
-      return sb - sa || a.name.localeCompare(b.name);
+  const companies: CompanyAccountability[] = [];
+  for (const g of Array.from(byCompany.values())) {
+    const creators = Array.from(g.byCreator.values()).map((es) => mergeCreatorTiers(es, target));
+    const behind = creators
+      .filter((c) => c.status === "behind")
+      // Lead with the worst gap (largest shortfall first), then by name.
+      .sort((a, b) => {
+        const sa = (a.expected ?? 0) - (a.postsDelta ?? 0);
+        const sb = (b.expected ?? 0) - (b.postsDelta ?? 0);
+        return sb - sa || a.name.localeCompare(b.name);
+      });
+    companies.push({
+      company: g.company,
+      programNames: Array.from(g.programNames).sort(),
+      asOf: g.asOf,
+      target,
+      creators,
+      behind,
+      onTrack: creators.filter((c) => c.status === "on_track"),
+      noData: creators.filter((c) => c.status === "no_data"),
     });
   }
-  campaigns.sort((a, b) => a.programName.localeCompare(b.programName));
+  companies.sort((a, b) => a.company.localeCompare(b.company));
 
-  return { asOf, target, sync, campaigns };
+  return { asOf, target, sync, companies };
 }

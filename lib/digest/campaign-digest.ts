@@ -13,7 +13,7 @@
 import {
   buildAccountabilityReport,
   type AccountabilityReport,
-  type CampaignAccountability,
+  type CompanyAccountability,
   type CreatorAccountability,
   type SyncHealth,
 } from "@/lib/queries/accountability";
@@ -52,27 +52,26 @@ function creatorLine(c: CreatorAccountability): string {
   return `• ${c.name}: ${n(posts)} posts in ${span} ${dayWord} (target ${n(c.expected ?? 0)})${views}`;
 }
 
-function campaignSection(camp: CampaignAccountability): string {
-  const brand = camp.companyName ? ` (${camp.companyName})` : "";
-  const head = `*${camp.programName}*${brand}  ·  as of ${camp.asOf}, target ${camp.target}/creator/day`;
+function companySection(c: CompanyAccountability): string {
+  const tierCount = c.programNames.length;
+  const tierWord = tierCount === 1 ? "tier" : "tiers";
+  const head = `*${c.company}*  ·  ${tierCount} ${tierWord} · as of ${c.asOf}, target ${c.target}/creator/day`;
   const tally =
-    `:red_circle: ${camp.behind.length} behind` +
-    `   :white_check_mark: ${camp.onTrack.length} on track` +
-    (camp.noData.length ? `   :grey_question: ${camp.noData.length} no data` : "");
+    `:red_circle: ${c.behind.length} behind` +
+    `   :white_check_mark: ${c.onTrack.length} on track` +
+    (c.noData.length ? `   :grey_question: ${c.noData.length} no data` : "");
 
   const parts = [head, tally];
 
-  if (camp.behind.length) {
+  if (c.behind.length) {
     parts.push("Behind:");
-    parts.push(camp.behind.map(creatorLine).join("\n"));
+    parts.push(c.behind.map(creatorLine).join("\n"));
   }
-  if (camp.onTrack.length) {
-    const names = camp.onTrack.map((c) => c.name).join(", ");
-    parts.push(`On track: ${names}`);
+  if (c.onTrack.length) {
+    parts.push(`On track: ${c.onTrack.map((x) => x.name).join(", ")}`);
   }
-  if (camp.noData.length) {
-    const names = camp.noData.map((c) => c.name).join(", ");
-    parts.push(`No data (single snapshot, nothing to compare): ${names}`);
+  if (c.noData.length) {
+    parts.push(`No data (single snapshot, nothing to compare): ${c.noData.map((x) => x.name).join(", ")}`);
   }
   return parts.join("\n");
 }
@@ -80,7 +79,7 @@ function campaignSection(camp: CampaignAccountability): string {
 /** Render the whole report to a Slack message. Assumes the stale gate already
  *  passed (the orchestrator calls formatSyncStale instead when it has not). */
 export function formatDigest(report: AccountabilityReport): string {
-  if (!report.campaigns.length) {
+  if (!report.companies.length) {
     return (
       `:bar_chart: *Campaign Accountability* (${report.asOf ?? "no data"})\n` +
       `No active campaigns are syncing fresh data. Nothing to report.`
@@ -88,10 +87,11 @@ export function formatDigest(report: AccountabilityReport): string {
   }
   const header =
     `:bar_chart: *Campaign Accountability* · ${report.asOf}\n` +
-    `Posts added since each creator's previous snapshot, vs a target of ` +
-    `${report.target}/creator/day. Sideshift has no per-platform grain, so this is ` +
-    `total posts/creator (see DECISIONS topic: campaign-accountability).`;
-  const sections = report.campaigns.map(campaignSection);
+    `One section per client. Posts added since each creator's previous snapshot, vs a ` +
+    `target of ${report.target}/creator/day (summed across a creator's tiers, counted ` +
+    `once). Sideshift has no per-platform grain, so this is total posts/creator ` +
+    `(see DECISIONS topic: campaign-accountability).`;
+  const sections = report.companies.map(companySection);
   return [header, ...sections].join("\n\n");
 }
 
