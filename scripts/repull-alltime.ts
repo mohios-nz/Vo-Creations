@@ -375,7 +375,10 @@ async function main() {
   const anchorDateByProg = new Map(progDates.map((r) => [r.program_id, r.d]));
   const today = new Date().toISOString().slice(0, 10);
   const targetByUid = new Map(plans.filter((p) => p.targetId && !p.held).map((p) => [p.a.uid, p.targetId!]));      // canonical identity/anchor home
-  const backfillByUid = new Map(plans.filter((p) => (p.action === "merge" || p.action === "rekey") && p.backfillId).map((p) => [p.a.uid, p.backfillId!])); // where backfill snapshots live
+  // where this human's backfill snapshots live RIGHT NOW: pre-apply = the backfill row (merge/rekey);
+  // post-apply (a second --anchor run) = the canonical row they were merged/re-keyed into ("already",
+  // whose backfillId is the canonical id). Held/alias-merge carry no own backfill series.
+  const backfillByUid = new Map(plans.filter((p) => !p.held && p.action !== "alias-merge" && p.backfillId).map((p) => [p.a.uid, p.backfillId!]));
 
   type Method = "additive-shift" | "warming-up" | "no-series";
   type Anchor = {
@@ -448,7 +451,11 @@ async function main() {
   }
 
   // ── APPLY (sequence: MERGE → RE-KEY → set brand_key → --anchor) ────────────────
-  if (!merges.length && !reKeys.length && !aliasMerges.length) { console.log("\n✖ Nothing to apply (no merges/aliases/re-keys resolved). Aborting.\n"); await sql.end(); return; }
+  // Abort only if there is genuinely nothing to do. A second `--anchor` run (after identity was
+  // already unified) has 0 merges/re-keys but still has anchors to write — must not bail then.
+  if (!merges.length && !reKeys.length && !aliasMerges.length && !(ANCHOR && anchorPlan.length)) {
+    console.log("\n✖ Nothing to apply (no merges/aliases/re-keys, and no anchors). Aborting.\n"); await sql.end(); return;
+  }
   // brand_key + the allTimeBoard dedup must exist before --anchor, else cron-brand anchors
   // double-count against live tiers. Refuse --anchor if the column is missing (migration 0004).
   const hasBrandKey = (await sql`select 1 from information_schema.columns where table_name='programs' and column_name='brand_key'`).length > 0;
