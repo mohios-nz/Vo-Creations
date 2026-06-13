@@ -198,6 +198,48 @@ async function allTimeBoard(programId: string | null): Promise<RawRow[]> {
   return rows as unknown as RawRow[];
 }
 
+/**
+ * TRIPWIRE for the brand_key dedup (docs/DECISIONS topic: alltime-repull). The dedup drops a
+ * brand's backfill/anchor row for a creator once a LIVE tier row exists for that (brand_key,
+ * creator) — lossless ONLY while the live tiers cover the whole brand total. If a brand ever
+ * gains a tier that ended before it was live-synced, the dropped anchor would carry views the
+ * live tiers don't, and that creator would silently undercount. This returns exactly those
+ * (brand_key, creator) where the dropped anchor total EXCEEDS the live-tier sum, so the cron can
+ * warn (sync_runs + Slack) with the brand/creator/delta. Empty today (all cron brands fully
+ * active); a non-empty result names the precise case to fix.
+ */
+export interface AnchorDropLoss {
+  brandKey: string; creatorId: string; name: string; anchorViews: number; liveViews: number; delta: number;
+}
+export async function anchorDropLoss(): Promise<AnchorDropLoss[]> {
+  const rows = await db.execute<{ brand_key: string; creator_id: string; name: string; anchor_views: string; live_views: string; delta: string }>(sql`
+    with latest_pc as (
+      select distinct on (s.program_id, s.creator_id)
+             s.program_id, s.creator_id, s.lifetime_views v, pr.brand_key, pr.source as prog_source
+      from snapshots s join programs pr on pr.id = s.program_id
+      where pr.brand_key is not null
+      order by s.program_id, s.creator_id, s.snapshot_date desc
+    ),
+    per_bc as (
+      select brand_key, creator_id,
+             coalesce(sum(v) filter (where prog_source = 'sideshift'), 0) as live_views,
+             coalesce(sum(v) filter (where prog_source <> 'sideshift'), 0) as anchor_views,
+             bool_or(prog_source = 'sideshift') as has_live
+      from latest_pc group by brand_key, creator_id
+    )
+    select p.brand_key, p.creator_id, c.name,
+           p.anchor_views::bigint as anchor_views, p.live_views::bigint as live_views,
+           (p.anchor_views - p.live_views)::bigint as delta
+    from per_bc p join creators c on c.id = p.creator_id
+    where p.has_live and p.anchor_views > p.live_views
+    order by delta desc
+  `);
+  return rows.map((r) => ({
+    brandKey: r.brand_key, creatorId: r.creator_id, name: r.name,
+    anchorViews: Number(r.anchor_views), liveViews: Number(r.live_views), delta: Number(r.delta),
+  }));
+}
+
 /** creatorId → a representative avatar (handles carry the image, not the creator row). */
 async function profileImageMap(): Promise<Map<string, string>> {
   const rows = await db.execute<{ creator_id: string; profile_image_url: string }>(sql`

@@ -54,6 +54,43 @@ or their creators. A single key is why the live board had ~25 creators.
 under-collected the platform. Supersedes the single-`SIDESHIFT_API_KEY` assumption in
 `topic: sideshift-api` (that entry's endpoint contract is otherwise unchanged).
 
+## topic: alltime-repull — _2026-06_ (creator merge + brand_key dedup + tripwire)
+
+Refines the earlier `alltime-repull` entry after the multi-brand cron went live (3 brands:
+aonic/ecomrads/coworker) and created **real-uid creator rows that duplicated the backfill rows**
+(16 humans double-counted, ~20.5M views). The repull now reconciles identity at TWO grains:
+
+- **Creator merge (one human = one creator_id).** CANONICAL = the cron-created real-uid row.
+  `scripts/repull-alltime.ts` MERGEs a synthetic `backfill:` dup into it (re-point
+  snapshots/campaign_accounts/program_creators conflict-safe, drop the synthetic row); RE-KEYs a
+  backfill row when no cron twin exists yet. A backfill row CONTESTED by ≥2 real uids (a
+  repurposed handle reused across campaigns) is HELD, never mis-merged.
+- **Confirmed multi-uid → ALIAS.** When one human ends up with two REAL uids (repurposed handle),
+  the secondary uid is ALIAS-MERGEd into the canonical AND recorded in **`creator_aliases`**
+  (migration 0005). `upsertCreator` (`lib/ingest/sync.ts`) consults that table FIRST, so a future
+  sync that still sees the secondary uid in topCreators routes to the canonical row → the merge is
+  permanent (a plain delete would un-merge next sync). Confirmed cases are an explicit allowlist
+  (`CONFIRMED_MERGES`) — extend per human (Johnathan Jen, 2026-06: `0NC7…` canonical, `MwVh…` alias).
+- **Program-level brand_key dedup.** The backfill is per-BRAND, the live cron per-TIER.
+  `programs.brand_key` (migration 0004) links them; `allTimeBoard` keeps live-tier rows and drops
+  a brand's backfill/anchor row once a LIVE tier row exists for that (brand_key, creator) — one
+  source per (brand_key, creator). **Provable no-op until brand_key is set** (all NULL → every row
+  kept). Anchors go on the per-brand backfill program; capture% = brand-backfill-latest /
+  brand-API-total (brand grain, not per-tier).
+- **Lossless caveat + TRIPWIRE.** Dropping the anchor in favour of live tiers is lossless ONLY
+  while the live tiers cover the brand total — true today (all 3 cron brands have 0 ended tiers,
+  verified: 0 creators undercounted). If a brand later gains a tier that **ended before it was
+  live-synced**, the dropped anchor would carry views the live tiers don't. Instead of a
+  speculative MAX guard, the daily cron runs `anchorDropLoss()` (`lib/queries/leaderboard.ts`)
+  and logs `anchor_drop_would_lose_views` to `sync_runs` + Slack with the exact brand/creator/delta
+  — empty today, names the precise case to fix if it ever fires.
+- **Apply order (no double-count window):** deploy the dedup+alias CODE first (no-op while
+  brand_key NULL + aliases empty) → migrate 0004+0005 → `--apply` (merge/alias/re-key + brand_key)
+  → `--apply --anchor`. Populating brand_key/aliases is what ACTIVATES the already-deployed dedup,
+  so the board never sits anchored-but-un-deduped. Verified by an independent read-only pass:
+  double-count 16→0, alias permanence, foldInto conflict-safety, override fires only for the
+  allowlist, dedup/alias no-op today.
+
 ## topic: alltime-repull — _2026-06_
 
 All-time totals undercounted Sideshift by 6–96% per creator (Kiera 13.4M vs ~28.6M; Casey

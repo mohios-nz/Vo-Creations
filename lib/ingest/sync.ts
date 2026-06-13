@@ -17,6 +17,7 @@ import {
   programs, creators, programCreators, campaignAccounts, snapshots, rawIngest, syncRuns, creatorAliases,
 } from "@/lib/db/schema";
 import { notifySlack } from "@/lib/notify/slack";
+import { anchorDropLoss } from "@/lib/queries/leaderboard";
 import type { IngestAdapter, NormalizedProgram, RawPayload } from "./types";
 
 /** Today's date as YYYY-MM-DD (UTC) — the snapshot key. */
@@ -64,6 +65,22 @@ export async function runSync(adapter: IngestAdapter): Promise<SyncResult> {
           error: err instanceof Error ? err.message : String(err),
         });
       }
+    }
+
+    // TRIPWIRE: the brand_key all-time dedup drops a backfill/anchor row when a live tier exists.
+    // That is lossless only while live tiers cover the brand total. Warn if a dropped anchor would
+    // exceed the live-tier sum for any (brand_key, creator). Empty today. See DECISIONS alltime-repull.
+    try {
+      for (const loss of await anchorDropLoss()) {
+        warnings.push({
+          kind: "anchor_drop_would_lose_views",
+          brand: loss.brandKey, creator: loss.name, creatorId: loss.creatorId,
+          anchorViews: loss.anchorViews, liveViews: loss.liveViews, delta: loss.delta,
+        });
+      }
+    } catch (err) {
+      // never let the tripwire fail the sync (e.g. brand_key column not yet migrated)
+      warnings.push({ kind: "anchor_drop_check_failed", error: err instanceof Error ? err.message : String(err) });
     }
   } catch (err) {
     status = "error";
